@@ -1,7 +1,7 @@
-# Mini PokÃ©mon: Local Engineering Contract
+# Mini Pokémon: Local Engineering Contract
 
 ## Goal and scope
-Build a beginner-appropriate Flutter/Dart PokÃ©mon CRUD application for a presentation on 2026-11-19. Support create, read, update, and delete for PokÃ©mon with ID, name, type, HP, attack, and defense. Begin with in-memory data and native Flutter state management (`setState`). No database, API, or additional state-management package unless a requirement justifies it.
+Build a beginner-appropriate Flutter/Dart Pokémon CRUD application for a presentation on 2026-11-19. Support create, read, update, and delete for Pokémon with ID, name, type, HP, attack, and defense. Begin with in-memory data and native Flutter state management (`setState`). No database, API, or additional state-management package unless a requirement justifies it.
 
 ## Instruction hierarchy
 Follow the published `main` branch of https://github.com/nickos8/portable-ai-instructions, version 2.0.0, including `MASTER_INSTRUCTIONS.md` and modules: `TEACHING_AND_REVIEW.md`, `ADHD_STUDY_PLANNING.md`, `CODING_AND_PROJECT_WORK.md`, `PROJECT_ENGINEERING.md`, `AI_COLLABORATION.md`, and `LEARNING_DOCUMENTATION.md`. If offline, follow this local contract and disclose missing instruction access. Higher-priority platform and safety requirements take precedence.
