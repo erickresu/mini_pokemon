@@ -20,6 +20,7 @@ void main() {
     await tester.pumpWidget(const MyApp());
     expect(find.text('3 Pokemon'), findsOneWidget);
     expect(find.text('Charmander'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Squirtle'), 120, scrollable: find.byType(Scrollable).first);
     expect(find.text('Squirtle'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Bulbasaur'), 150, scrollable: find.byType(Scrollable).first);
     expect(find.text('Bulbasaur'), findsOneWidget);
@@ -55,6 +56,7 @@ void main() {
 
   testWidgets('Edits an entry while retaining its ID', (tester) async {
     await tester.pumpWidget(const MyApp());
+    await tester.ensureVisible(find.descendant(of: find.byKey(const ValueKey(1)), matching: find.text('Edit')));
     await tester.tap(find.descendant(of: find.byKey(const ValueKey(1)), matching: find.text('Edit')));
     await tester.pumpAndSettle();
     expect(find.text('Edit Pokemon'), findsOneWidget);
@@ -70,16 +72,39 @@ void main() {
 
   testWidgets('Cancels and confirms deletion', (tester) async {
     await tester.pumpWidget(const MyApp());
+    await tester.ensureVisible(find.descendant(of: find.byKey(const ValueKey(1)), matching: find.text('Delete')));
     await tester.tap(find.descendant(of: find.byKey(const ValueKey(1)), matching: find.text('Delete')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(find.text('Charmander'), findsOneWidget);
+    await tester.ensureVisible(find.descendant(of: find.byKey(const ValueKey(1)), matching: find.text('Delete')));
     await tester.tap(find.descendant(of: find.byKey(const ValueKey(1)), matching: find.text('Delete')));
     await tester.pumpAndSettle();
     await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text('Delete')));
     await tester.pumpAndSettle();
     expect(find.text('Charmander'), findsNothing);
     expect(find.text('2 Pokemon'), findsOneWidget);
+  });
+
+  testWidgets('Removes a bundled portrait without deleting the record', (tester) async {
+    await tester.pumpWidget(const MyApp());
+    final finder = find.descendant(
+      of: find.byKey(const ValueKey(1)),
+      matching: find.text('Edit'),
+    );
+    await tester.ensureVisible(finder);
+    await tester.tap(finder);
+    await tester.pumpAndSettle();
+    final removePhoto = find.text('Remove Photo');
+    await tester.ensureVisible(removePhoto);
+    await tester.tap(removePhoto);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    final card = tester.widget<PokemonCard>(find.byKey(const ValueKey(1)));
+    expect(card.pokemon.assetPath, isNull);
+    expect(card.pokemon.imagePath, isNull);
+    expect(card.pokemon.name, 'Charmander');
   });
 }
