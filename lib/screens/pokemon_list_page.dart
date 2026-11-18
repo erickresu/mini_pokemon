@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:material_ui/material_ui.dart';
 
 import '../models/pokemon.dart';
@@ -16,6 +18,7 @@ class _PokemonListPageState extends State<PokemonListPage> {
     const Pokemon(
       id: 1,
       name: 'Charmander',
+      assetPath: 'assets/pokemon/charmander.png',
       type: 'Fire',
       hp: 100,
       attack: 52,
@@ -24,6 +27,7 @@ class _PokemonListPageState extends State<PokemonListPage> {
     const Pokemon(
       id: 2,
       name: 'Squirtle',
+      assetPath: 'assets/pokemon/squirtle.png',
       type: 'Water',
       hp: 110,
       attack: 48,
@@ -32,6 +36,7 @@ class _PokemonListPageState extends State<PokemonListPage> {
     const Pokemon(
       id: 3,
       name: 'Bulbasaur',
+      assetPath: 'assets/pokemon/bulbasaur.png',
       type: 'Grass',
       hp: 90,
       attack: 49,
@@ -109,15 +114,21 @@ class _PokemonListPageState extends State<PokemonListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F8),
+      backgroundColor: const Color(0xFFF5F3EC),
       appBar: AppBar(
-        title: const Text('Mini Pokemon'),
-        backgroundColor: const Color(0xFFF4F6F8),
+        title: const Row(
+          children: [
+            Icon(Icons.catching_pokemon, color: Color(0xFFBA4938)),
+            SizedBox(width: 10),
+            Text('POKEMON', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 1)),
+          ],
+        ),
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 20),
-            child: Icon(Icons.catching_pokemon, size: 30),
+            child: Center(child: Text('FIELD GUIDE', style: TextStyle(fontSize: 11, letterSpacing: 1))),
           ),
         ],
       ),
@@ -126,38 +137,58 @@ class _PokemonListPageState extends State<PokemonListPage> {
         icon: const Icon(Icons.add),
         label: const Text('Add Pokemon'),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('MY COLLECTION', style: Theme.of(context).textTheme.labelMedium),
-                const SizedBox(height: 6),
-                Text('${_pokemons.length} Pokemon', style: Theme.of(context).textTheme.headlineMedium),
-                const SizedBox(height: 4),
-                const Text('Build and manage your team.'),
-              ],
-            ),
+          const Positioned(
+            top: 0,
+            right: -60,
+            child: Icon(Icons.catching_pokemon, size: 230, color: Color(0x0C394038)),
           ),
-          Expanded(
-            child: _pokemons.isEmpty
-                ? const Center(child: Text('No Pokemon yet. Add your first one!'))
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-                    itemCount: _pokemons.length,
-                    itemBuilder: (context, index) {
-                      final pokemon = _pokemons[index];
-                      return PokemonCard(
-                        key: ValueKey(pokemon.id),
-                        pokemon: pokemon,
-                        onEdit: () => _showEditPokemonDialog(index),
-                        onDelete: () => _deletePokemon(index),
-                      );
-                    },
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  child: Container(
+                    width: double.infinity,
+                    color: const Color(0xD9F5F3EC),
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Divider(color: Color(0xFF394038)),
+                        Text('Collection', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Expanded(child: Text('Your Pokemon roster')),
+                            Text('${_pokemons.length} Pokemon', style: const TextStyle(color: Color(0xFFBA4938), fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
+                ),
+              ),
+              Expanded(
+                child: _pokemons.isEmpty
+                    ? const Center(child: Text('No Pokemon yet. Add your first one!'))
+                    : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
+                        itemCount: _pokemons.length,
+                        itemBuilder: (context, index) {
+                          final pokemon = _pokemons[index];
+                          return PokemonCard(
+                            key: ValueKey(pokemon.id),
+                            pokemon: pokemon,
+                            onEdit: () => _showEditPokemonDialog(index),
+                            onDelete: () => _deletePokemon(index),
+                          );
+                        },
+                      ),
+              ),
+            ],
           ),
         ],
       ),
