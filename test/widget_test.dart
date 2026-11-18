@@ -21,7 +21,10 @@ void main() {
     expect(find.text('3 Pokemon'), findsOneWidget);
     expect(find.text('Charmander'), findsOneWidget);
     expect(find.text('Squirtle'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Bulbasaur'), 150, scrollable: find.byType(Scrollable).first);
     expect(find.text('Bulbasaur'), findsOneWidget);
+    expect(tester.widget<PokemonCard>(find.byKey(const ValueKey(3))).pokemon.assetPath,
+        'assets/pokemon/bulbasaur.png');
   });
 
   testWidgets('Rejects empty and invalid fields', (tester) async {
@@ -46,13 +49,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('4 Pokemon'), findsOneWidget);
     final card = find.byKey(const ValueKey(4));
-    await tester.scrollUntilVisible(card, 150);
+    await tester.scrollUntilVisible(card, 150, scrollable: find.byType(Scrollable).first);
     expect(tester.widget<PokemonCard>(card).pokemon.name, 'Pikachu');
   });
 
   testWidgets('Edits an entry while retaining its ID', (tester) async {
     await tester.pumpWidget(const MyApp());
-    await tester.tap(find.byTooltip('Edit Charmander'));
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey(1)), matching: find.text('Edit')));
     await tester.pumpAndSettle();
     expect(find.text('Edit Pokemon'), findsOneWidget);
     await fillField(tester, 2, '150');
@@ -61,19 +64,20 @@ void main() {
     final card = tester.widget<PokemonCard>(find.byKey(const ValueKey(1)));
     expect(card.pokemon.hp, 150);
     expect(card.pokemon.id, 1);
+    expect(card.pokemon.assetPath, 'assets/pokemon/charmander.png');
     expect(find.text('3 Pokemon'), findsOneWidget);
   });
 
   testWidgets('Cancels and confirms deletion', (tester) async {
     await tester.pumpWidget(const MyApp());
-    await tester.tap(find.byTooltip('Delete Charmander'));
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey(1)), matching: find.text('Delete')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(find.text('Charmander'), findsOneWidget);
-    await tester.tap(find.byTooltip('Delete Charmander'));
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey(1)), matching: find.text('Delete')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Delete'));
+    await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text('Delete')));
     await tester.pumpAndSettle();
     expect(find.text('Charmander'), findsNothing);
     expect(find.text('2 Pokemon'), findsOneWidget);
