@@ -18,6 +18,7 @@ class PokemonFormDialog extends StatefulWidget {
 class _PokemonFormDialogState extends State<PokemonFormDialog> {
   final _formKey = GlobalKey<FormState>();
   String? _imagePath;
+  String? _assetPath;
 
   final _nameController = TextEditingController();
   final _typeController = TextEditingController();
@@ -33,6 +34,7 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
 
     if (pokemon != null) {
       _imagePath = pokemon.imagePath;
+      _assetPath = pokemon.assetPath;
       _nameController.text = pokemon.name;
       _typeController.text = pokemon.type;
       _hpController.text = pokemon.hp.toString();
@@ -63,6 +65,7 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
 
       setState(() {
         _imagePath = image.path;
+        _assetPath = null;
       });
     } catch (_) {
       if (!mounted) return;
@@ -77,6 +80,8 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
     return AlertDialog(
       title: Text(widget.pokemon == null ? 'Add Pokemon' : 'Edit Pokemon'),
       scrollable: true,
+      backgroundColor: const Color(0xFFF5F3EC),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       content: SizedBox(
         width: 340,
         child: Form(
@@ -84,13 +89,16 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ClipOval(
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
                 child: Container(
                   width: 90,
                   height: 90,
-                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  color: const Color(0xFFE5E7DC),
                   child: _imagePath == null
-                      ? const Icon(Icons.catching_pokemon, size: 40)
+                      ? (_assetPath == null
+                          ? const Icon(Icons.catching_pokemon, size: 40)
+                          : Image.asset(_assetPath!, fit: BoxFit.contain))
                       : Image.file(
                           File(_imagePath!),
                           fit: BoxFit.cover,
@@ -106,9 +114,12 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
                 label: const Text('Choose Photo'),
               ),
 
-              if (_imagePath != null)
+              if (_imagePath != null || _assetPath != null)
                 TextButton(
-                  onPressed: () => setState(() => _imagePath = null),
+                  onPressed: () => setState(() {
+                    _imagePath = null;
+                    _assetPath = null;
+                  }),
                   child: const Text('Remove Photo'),
                 ),
               const SizedBox(height: 12),
@@ -138,6 +149,7 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
                 attack: int.parse(_attackController.text.trim()),
                 defense: int.parse(_defenseController.text.trim()),
                 imagePath: _imagePath,
+                assetPath: _assetPath,
               );
 
               Navigator.pop(context, pokemon);
@@ -157,24 +169,24 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
-      controller: controller,
-      decoration: InputDecoration(labelText: label),
-      keyboardType: numeric ? TextInputType.number : TextInputType.text,
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Required field';
-        }
-
-        if (numeric) {
-          final number = int.tryParse(value.trim());
-
-          if (number == null || number <= 0) {
-            return 'Enter a positive integer';
+        controller: controller,
+        decoration: InputDecoration(labelText: label),
+        keyboardType: numeric ? TextInputType.number : TextInputType.text,
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return 'Required field';
           }
-        }
 
-        return null;
-      },
+          if (numeric) {
+            final number = int.tryParse(value.trim());
+
+            if (number == null || number <= 0) {
+              return 'Enter a positive integer';
+            }
+          }
+
+          return null;
+        },
       ),
     );
   }
