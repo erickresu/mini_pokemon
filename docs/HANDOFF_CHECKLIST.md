@@ -1,22 +1,15 @@
 # Handoff Checklist
 
-## Before ending or switching assistants
-- [ ] Read `AGENTS.md` and current project records
-- [ ] Inspect local Git branch, status, and diffs
-- [ ] Record latest local commit (or explicitly unknown)
-- [ ] Record latest remote commit (or explicitly unknown)
-- [ ] Record last verified checkpoint with commands and observed output
-- [ ] Record uncommitted work and blockers
-- [ ] Update `docs/PROJECT_MEMORY.md` with exactly one next safe action
-- [ ] Update learning status only with teach-back or independent-work evidence
-- [ ] Review changes for secrets before any proposed commit
-- [ ] Obtain explicit approval before remote GitHub writes
+- [x] Read local engineering contract and source at UI-polish base.
+- [x] Obtain approval for separate Field Guide branch and starter portraits.
+- [x] Preserve original CRUD methods and dependencies.
+- [x] Write updated widget tests and reviewer.
+- [ ] Recheck local Windows working tree and branch before synchronization.
+- [ ] Run dart format lib test and inspect formatting changes.
+- [ ] Run flutter pub get, flutter analyze, flutter test.
+- [ ] Launch Android app; verify all three starter portraits.
+- [ ] Create with gallery photo; cancel picker; edit text without losing photo; replace and remove portrait; cancel edit; delete with confirmation.
+- [ ] Check narrow screen, scrolling, keyboard and visual contrast.
+- [ ] Record exact test results and approve merge separately.
 
-## Verified checkpoint: 2026-11-17
-- Local Windows branch: `main` at `25144e0fe137438649e03a9af97ddac9ecd0a5e1` when last shown in PowerShell. Current Windows working tree is not remotely inspectable.
-- GitHub repository: https://github.com/nickos8/mini_pokemon (public).
-- Uploaded remote baseline: `25144e0fe137438649e03a9af97ddac9ecd0a5e1`, verified by GitHub.
-- Approved remote documentation updates: encoding fixes, memory, handoff, learning tracker. Remote `main` may advance after baseline; inspect before local synchronization.
-- Engineering baseline: starter APK built/installed on emulator; previously reported `flutter analyze` clean and `flutter test` 1 passing counter test. No tests rerun for documentation-only updates.
-- Learning: startup guided teach-back partially confirmed; `MaterialApp.home` still needs retest. Pokémon CRUD not implemented/verified.
-- Next action: inspect current local Git status, local/remote commit identities, and uncommitted work before synchronizing the remote documentation changes.
+Previous local checkpoint ce0474f; current local branch/commit unknown. Feature base 6e09d940. Remote head should be inspected with git fetch and git log. Do not force push or delete unrelated untracked files.
