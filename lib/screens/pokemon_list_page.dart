@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../models/pokemon.dart';
 import '../widgets/pokemon_form_dialog.dart';
+import '../widgets/pokemon_card.dart';
 
 class PokemonListPage extends StatefulWidget {
   const PokemonListPage({super.key});
@@ -109,42 +110,56 @@ class _PokemonListPageState extends State<PokemonListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mini Pokemon')),
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddPokemonDialog,
-        child: const Icon(Icons.add),
+      backgroundColor: const Color(0xFFF4F6F8),
+      appBar: AppBar(
+        title: const Text('Mini Pokemon'),
+        backgroundColor: const Color(0xFFF4F6F8),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 20),
+            child: Icon(Icons.catching_pokemon, size: 30),
+          ),
+        ],
       ),
-
-      body: ListView.builder(
-        itemCount: _pokemons.length,
-        itemBuilder: (context, index) {
-          final pokemon = _pokemons[index];
-
-          return ListTile(
-            title: Text(pokemon.name),
-            subtitle: Text('${pokemon.type} | HP: ${pokemon.hp}'),
-
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAddPokemonDialog,
+        icon: const Icon(Icons.add),
+        label: const Text('Add Pokemon'),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    _showEditPokemonDialog(index);
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  color: Colors.red,
-                  onPressed: () {
-                    _deletePokemon(index);
-                  },
-                ),
+                Text('MY COLLECTION', style: Theme.of(context).textTheme.labelMedium),
+                const SizedBox(height: 6),
+                Text('${_pokemons.length} Pokemon', style: Theme.of(context).textTheme.headlineMedium),
+                const SizedBox(height: 4),
+                const Text('Build and manage your team.'),
               ],
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: _pokemons.isEmpty
+                ? const Center(child: Text('No Pokemon yet. Add your first one!'))
+                : ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
+                    itemCount: _pokemons.length,
+                    itemBuilder: (context, index) {
+                      final pokemon = _pokemons[index];
+                      return PokemonCard(
+                        key: ValueKey(pokemon.id),
+                        pokemon: pokemon,
+                        onEdit: () => _showEditPokemonDialog(index),
+                        onDelete: () => _deletePokemon(index),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
     );
   }
