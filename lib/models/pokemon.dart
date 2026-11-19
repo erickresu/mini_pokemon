@@ -6,6 +6,7 @@ class Pokemon {
   final int attack;
   final int defense;
   final String? imagePath;
+  final String? assetPath;
 
   const Pokemon({
     required this.id,
@@ -15,5 +16,6 @@ class Pokemon {
     required this.attack,
     required this.defense,
     this.imagePath,
+    this.assetPath,
   });
 }

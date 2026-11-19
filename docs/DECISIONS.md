@@ -9,3 +9,8 @@
 ## 2026-11-17: Learning and engineering records
 - **Decision:** Keep local instructions in `AGENTS.md`, verified project state in `docs/`, and demonstrated learning in `learning/`.
 - **Reason:** Support safe collaboration, progress tracking, and independent explanation.
+
+## 2026-11-18: Field Guide presentation and assets
+- Decision: preserve list, dialogs, CRUD and native setState; warm paper, vermilion, editorial cards and localized header blur.
+- Decision: bundle three starter PNGs and use optional assetPath separately from gallery imagePath.
+- Tradeoff: static assets increase bundle size; no runtime network request. Image paths and collection edits are not permanently stored. No extra packages.
