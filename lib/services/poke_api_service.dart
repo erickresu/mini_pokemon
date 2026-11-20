@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/poke_api_pokemon.dart';
+import '../models/poke_api_pokemon_page.dart';
 import '../models/poke_api_pokemon_summary.dart';
 
 class PokeApiService {
@@ -28,6 +29,14 @@ class PokeApiService {
     int limit = 20,
     int offset = 0,
   }) async {
+    final page = await fetchPokemonPage(limit: limit, offset: offset);
+    return page.results;
+  }
+
+  Future<PokeApiPokemonPage> fetchPokemonPage({
+    int limit = 20,
+    int offset = 0,
+  }) async {
     final uri = Uri.parse('$_baseUrl/pokemon').replace(
       queryParameters: {'limit': limit.toString(), 'offset': offset.toString()},
     );
@@ -39,12 +48,15 @@ class PokeApiService {
 
       final results = json['results'] as List;
 
-      return results
-          .map(
-            (item) =>
-                PokeApiPokemonSummary.fromJson(item as Map<String, dynamic>),
-          )
-          .toList();
+      return PokeApiPokemonPage(
+        results: results
+            .map(
+              (item) =>
+                  PokeApiPokemonSummary.fromJson(item as Map<String, dynamic>),
+            )
+            .toList(),
+        hasMore: (json['next'] as String?) != null,
+      );
     }
 
     throw Exception('Failed to fetch Pokemon list: ${response.statusCode}');

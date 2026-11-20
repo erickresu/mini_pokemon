@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:material_ui/material_ui.dart';
 
 import '../models/pokemon.dart';
+import 'pokemon_network_portrait.dart';
 
 class PokemonCard extends StatelessWidget {
   const PokemonCard({
@@ -156,6 +157,10 @@ class PokemonCard extends StatelessWidget {
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) => _placeholder(),
       );
+    }
+    final officialData = pokemon.officialData;
+    if (officialData != null) {
+      return PokemonNetworkPortrait(url: officialData.portraitUrl);
     }
     return _placeholder();
   }

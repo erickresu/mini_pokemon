@@ -14,3 +14,8 @@
 - Decision: preserve list, dialogs, CRUD and native setState; warm paper, vermilion, editorial cards and localized header blur.
 - Decision: bundle three starter PNGs and use optional assetPath separately from gallery imagePath.
 - Tradeoff: static assets increase bundle size; no runtime network request. Image paths and collection edits are not permanently stored. No extra packages.
+
+## V2 collection identity and artwork
+
+- API-backed entries retain the official snapshot and use a separate local collection ID. Duplicate API-backed entries are checked by API ID.
+- Official artwork is preferred, with the front sprite used when official artwork is absent. A missing or failed portrait uses a placeholder.

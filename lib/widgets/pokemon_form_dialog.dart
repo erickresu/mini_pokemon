@@ -150,6 +150,7 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
                 defense: int.parse(_defenseController.text.trim()),
                 imagePath: _imagePath,
                 assetPath: _assetPath,
+                officialData: widget.pokemon?.officialData,
               );
 
               Navigator.pop(context, pokemon);

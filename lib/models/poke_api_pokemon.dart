@@ -5,7 +5,13 @@ class PokeApiPokemon {
   final int hp;
   final int attack;
   final int defense;
+  final int specialAttack;
+  final int specialDefense;
+  final int speed;
   final String? imageUrl;
+  final String? artworkUrl;
+
+  String? get portraitUrl => artworkUrl ?? imageUrl;
 
   const PokeApiPokemon({
     required this.id,
@@ -14,7 +20,11 @@ class PokeApiPokemon {
     required this.hp,
     required this.attack,
     required this.defense,
+    required this.specialAttack,
+    required this.specialDefense,
+    required this.speed,
     this.imageUrl,
+    this.artworkUrl,
   });
 
   factory PokeApiPokemon.fromJson(Map<String, dynamic> json) {
@@ -26,6 +36,10 @@ class PokeApiPokemon {
       return stat['base_stat'] as int;
     }
 
+    final sprites = json['sprites'] as Map<String, dynamic>;
+    final other = sprites['other'] as Map<String, dynamic>?;
+    final artwork = other?['official-artwork'] as Map<String, dynamic>?;
+
     return PokeApiPokemon(
       id: json['id'],
       name: json['name'],
@@ -35,7 +49,11 @@ class PokeApiPokemon {
       hp: getStat('hp'),
       attack: getStat('attack'),
       defense: getStat('defense'),
-      imageUrl: json['sprites']['front_default'],
+      specialAttack: getStat('special-attack'),
+      specialDefense: getStat('special-defense'),
+      speed: getStat('speed'),
+      imageUrl: sprites['front_default'] as String?,
+      artworkUrl: artwork?['front_default'] as String?,
     );
   }
 }

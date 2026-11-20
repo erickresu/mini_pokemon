@@ -1,3 +1,5 @@
+import 'poke_api_pokemon.dart';
+
 class Pokemon {
   final int id;
   final String name;
@@ -7,6 +9,7 @@ class Pokemon {
   final int defense;
   final String? imagePath;
   final String? assetPath;
+  final PokeApiPokemon? officialData;
 
   const Pokemon({
     required this.id,
@@ -17,5 +20,6 @@ class Pokemon {
     required this.defense,
     this.imagePath,
     this.assetPath,
+    this.officialData,
   });
 }

@@ -2,12 +2,17 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:material_ui/material_ui.dart';
 
+import '../models/poke_api_pokemon.dart';
 import '../models/pokemon.dart';
+import '../services/poke_api_service.dart';
 import '../widgets/pokemon_form_dialog.dart';
 import '../widgets/pokemon_card.dart';
+import 'pokemon_discover_page.dart';
 
 class PokemonListPage extends StatefulWidget {
-  const PokemonListPage({super.key});
+  const PokemonListPage({super.key, this.discoveryService});
+
+  final PokeApiService? discoveryService;
 
   @override
   State<PokemonListPage> createState() => _PokemonListPageState();
@@ -44,6 +49,41 @@ class _PokemonListPageState extends State<PokemonListPage> {
     ),
   ];
   int _nextId = 4;
+
+  Future<void> _openDiscovery() async {
+    final officialData = await Navigator.of(context).push<PokeApiPokemon>(
+      MaterialPageRoute(
+        builder: (context) =>
+            PokemonDiscoverPage(service: widget.discoveryService),
+      ),
+    );
+
+    if (!mounted || officialData == null) return;
+    if (_pokemons.any((pokemon) => pokemon.officialData?.id == officialData.id)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Already in your collection.')),
+      );
+      return;
+    }
+
+    setState(() {
+      _pokemons.add(
+        Pokemon(
+          id: _nextId,
+          name: officialData.name[0].toUpperCase() + officialData.name.substring(1),
+          type: officialData.types.join(' / '),
+          hp: officialData.hp,
+          attack: officialData.attack,
+          defense: officialData.defense,
+          officialData: officialData,
+        ),
+      );
+      _nextId++;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Added to your collection.')),
+    );
+  }
 
   Future<void> _showAddPokemonDialog() async {
     final pokemon = await showDialog<Pokemon>(
@@ -125,8 +165,12 @@ class _PokemonListPageState extends State<PokemonListPage> {
             Text('POKEMON', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 1)),
           ],
         ),
-        actions: const [
-          Padding(
+        actions: [
+          TextButton(
+            onPressed: _openDiscovery,
+            child: const Text('Discover'),
+          ),
+          const Padding(
             padding: EdgeInsets.only(right: 20),
             child: Center(child: Text('FIELD GUIDE', style: TextStyle(fontSize: 11, letterSpacing: 1))),
           ),
