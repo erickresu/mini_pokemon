@@ -1,39 +1,63 @@
 # Project Memory
 
-## V2 details and collection artwork
+## Current checkpoint: Clean Architecture + API-only refactor
 
-- Branch `feature/pokeapi-integration` at `df72278`. Milestone changes remain unstaged and uncommitted.
-- The user reported milestone 1 working on the emulator. Discover now opens details with artwork, types, and six base stats. Collect returns to Collection and adds an in-memory entry with official artwork.
-- Windows `dart format` completed on the two models, detail and Discover screens, network portrait widget, and focused test file. `flutter analyze` found no issues. Final `flutter test` passed all nine widget tests, including a fake-service test of the artwork collection flow. Initial test attempts needed a scroll gesture to bring Collect into view.
-- `flutter run -d emulator-5554 --no-resident` built, installed, and launched the debug app. Live artwork rendering, release runtime, and learning verification were not tested in this pass.
-- Next safe action: manually open a Pokémon in Discover, Collect it, and confirm its artwork appears in Collection.
+- Worktree: `C:\dev\mini_pokemon_clean_architecture`
+- Branch: `refactor/clean-architecture-api-only`, base `b5bc104`
+- Original checkout `C:\dev\mini_pokemon` is untouched.
+- User decision: keep the branch only; no merge, push, pull, rebase, clean, or remote write.
+- User waiver: teaching gates and emulator gates skipped for this pass. Engineering verification still required.
+- Source shape: standard `domain`, `data`, `presentation` layers plus `lib/core/theme/`; `lib/main.dart` is the only composition root.
+- Behavior: collection starts empty; Discover loads PokéAPI pages; Detail loads one API Pokémon; `Collect` adds locally; Delete removes locally; no persistence and no API writes.
+- Dependencies: `flutter_bloc` and `bloc` added; `image_picker`, manual forms, seeded starters, and bundled PNGs removed.
 
-## V2 milestone 1: Discovery and pagination
+Verified from Windows PowerShell (WSL launcher fails on CRLF scripts):
 
-- Local branch: `feature/pokeapi-integration` at `df72278`. Milestone changes are unstaged and uncommitted. Pre-existing CRLF-only working-tree differences were preserved.
-- Collection opens the existing Discover screen. Discover appends pages on demand, retries the same offset after failures, and stops when PokéAPI provides no next page.
-- Windows SDK: `dart format lib/models/poke_api_pokemon_page.dart lib/screens/pokemon_discover_page.dart lib/services/poke_api_service.dart test/pokemon_discover_page_test.dart` formatted four files. `flutter analyze` reported no issues. `flutter test` passed all eight widget tests. `flutter devices` detected `emulator-5554`.
-- WSL Flutter launcher failed on CRLF in the installed SDK scripts. Live API scripts and learning verification were not run for this checkpoint.
-- `flutter run -d emulator-5554 --no-resident` built, installed, and launched the Android debug app. Next safe action: user manually checks Discover, Load more, retry, and return to Collection on the emulator.
+```powershell
+Set-Location 'C:\dev\mini_pokemon_clean_architecture'
+dart format lib test
+flutter pub get
+flutter analyze
+flutter test
+```
 
-## Earlier Field Guide checkpoint
+Observed on the final tree:
 
-Checkpoint: Field Guide redesign, following 2026-11-18 handoff.
+- `dart format lib test` → `Formatted 37 files (0 changed)`.
+- `flutter pub get` → `Got dependencies!`; only routine newer-version notices.
+- `flutter analyze` → `No issues found!`.
+- `flutter test` → `00:02 +21: All tests passed!`.
+- `flutter test test/layer_boundaries_test.dart` → passed earlier in this task.
+- Task 9 review found an Important `watchAll()` handoff race; fixed in `e31409d` with a single-subscription controller plus a two-test regression file.
 
-## Goal
-Learn five Flutter fundamentals through a small Pokémon CRUD project for the November 19 presentation.
+Blockers:
 
-## Evidence
-- User pushed main at ce0474f; local status showed only untracked "tatus --short". Subsequent local state unknown.
-- User reported CRUD working and flutter analyze clean on earlier implementation. Screenshot confirmed gallery photo preview.
-- UI-polish base 6e09d9407cee5951c218032a9f0d981852e3b9b4 inspected. Field Guide branch created from that base.
-- Field Guide app changes and six widget tests authored; no Dart/Flutter execution in remote editing environment.
-- Three official-artwork PNG blobs retrieved from public sprite repository and stored as local assets. Image paths and manifest connected in source.
-- Model gained optional assetPath so built-in portraits can be preserved, replaced or removed independently of gallery file paths.
-- Original add/edit/delete methods and list state retained.
+- No emulator output exists for this branch. Runtime checks are not verified; `docs/HANDOFF_CHECKLIST.md` leaves them unchecked.
+- Live PokéAPI calls were not exercised on a device; widget tests use fakes and DTO fixtures.
 
-## Verification boundaries
-New branch formatting, analyzer, widget tests, actual Android gallery selection, layout and blur performance remain pending. Earlier checks do not verify this branch. No persistence or live API.
+Next safe action: user reviews the branch and decides whether to approve integration. Do not merge or push without explicit approval.
 
-## Next safe action
-Inspect local git status and fetch/switch to feat/pokemon-field-guide, then run local analyzer, tests and emulator checks before merging.
+## Earlier checkpoints (historical)
+
+### V2 details and collection artwork
+
+- Branch `feature/pokeapi-integration` at `df72278`. Milestone changes remained unstaged and uncommitted at that checkpoint.
+- User reported milestone 1 working on the emulator. Discover opened details with artwork, types, and six base stats; Collect returned to Collection with an in-memory entry.
+- Windows `dart format` covered the two models, detail and Discover screens, network portrait widget, and focused test file. `flutter analyze` was clean; nine widget tests passed.
+- `flutter run -d emulator-5554 --no-resident` built and launched the debug app. Live artwork rendering and learning verification were not tested in that pass.
+- Those files and behaviors were replaced by the 2026-11-21 refactor. Do not use that checkpoint as current state.
+
+### V2 milestone 1: Discovery and pagination
+
+- Local branch `feature/pokeapi-integration` at `df72278`; changes unstaged, CRLF-only differences preserved.
+- Discover appended pages on demand, retried the same offset, and stopped when PokéAPI provided no next page.
+- Windows `flutter test` passed eight widget tests; `flutter devices` detected `emulator-5554`.
+- WSL Flutter launcher failed on CRLF in SDK scripts. Flutter/Dart commands must run through Windows PowerShell.
+- That implementation predates Clean Architecture and is superseded.
+
+### Earlier Field Guide checkpoint
+
+- Goal then: learn five Flutter fundamentals through a small Pokémon CRUD project for the November 19 presentation.
+- Field Guide redesign followed the 2026-11-18 handoff. CRUD, `setState`, dialogs, and three bundled PNGs were later removed.
+- Historical evidence included a screenshot-confirmed gallery preview and user-reported CRUD working.
+- No persistence, live API, or battle engine existed at that checkpoint.
