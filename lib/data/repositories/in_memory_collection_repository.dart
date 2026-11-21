@@ -9,18 +9,9 @@ class InMemoryCollectionRepository implements CollectionRepository {
       StreamController<List<Pokemon>>.broadcast();
 
   @override
-  Stream<List<Pokemon>> watchAll() {
-    final snapshot = List<Pokemon>.unmodifiable(_items);
-
-    return Stream<List<Pokemon>>.multi((controller) {
-      controller.add(snapshot);
-      final subscription = _controller.stream.listen(
-        controller.add,
-        onError: controller.addError,
-        onDone: controller.close,
-      );
-      controller.onCancel = subscription.cancel;
-    });
+  Stream<List<Pokemon>> watchAll() async* {
+    yield List<Pokemon>.unmodifiable(_items);
+    yield* _controller.stream;
   }
 
   @override
