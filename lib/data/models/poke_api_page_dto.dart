@@ -5,10 +5,7 @@ class PokeApiPokemonSummaryDto {
   final String name;
   final String url;
 
-  const PokeApiPokemonSummaryDto({
-    required this.name,
-    required this.url,
-  });
+  const PokeApiPokemonSummaryDto({required this.name, required this.url});
 
   factory PokeApiPokemonSummaryDto.fromJson(Map<String, dynamic> json) {
     return PokeApiPokemonSummaryDto(
@@ -26,10 +23,7 @@ class PokeApiPageDto {
   final List<PokeApiPokemonSummaryDto> results;
   final bool hasMore;
 
-  const PokeApiPageDto({
-    required this.results,
-    required this.hasMore,
-  });
+  const PokeApiPageDto({required this.results, required this.hasMore});
 
   factory PokeApiPageDto.fromJson(Map<String, dynamic> json) {
     final results = json['results'] as List;

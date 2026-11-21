@@ -1,23 +1,18 @@
-import 'dart:io';
-
 import 'package:material_ui/material_ui.dart';
 
-import '../models/pokemon.dart';
+import '../../domain/entities/pokemon.dart';
 import 'pokemon_network_portrait.dart';
 
 class PokemonCard extends StatelessWidget {
-  const PokemonCard({
-    super.key,
-    required this.pokemon,
-    required this.onEdit,
-    required this.onDelete,
-  });
+  const PokemonCard({super.key, required this.pokemon, required this.onDelete});
 
   final Pokemon pokemon;
-  final VoidCallback onEdit;
   final VoidCallback onDelete;
 
-  Color get _accent => switch (pokemon.type.trim().toLowerCase()) {
+  String get _primaryType =>
+      pokemon.types.isEmpty ? '' : pokemon.types.first.trim().toLowerCase();
+
+  Color get _accent => switch (_primaryType) {
     'fire' => const Color(0xFFAA5136),
     'water' => const Color(0xFF48788B),
     'grass' || 'earth' => const Color(0xFF4A7456),
@@ -48,7 +43,7 @@ class PokemonCard extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  'ENTRY / ${pokemon.id.toString().padLeft(3, '0')}',
+                  'ENTRY / ${pokemon.apiId.toString().padLeft(3, '0')}',
                   style: const TextStyle(
                     fontFamily: 'monospace',
                     fontSize: 11,
@@ -58,7 +53,7 @@ class PokemonCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    pokemon.type.toUpperCase(),
+                    pokemon.types.join(' / ').toUpperCase(),
                     textAlign: TextAlign.end,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -82,7 +77,7 @@ class PokemonCard extends StatelessWidget {
                     height: 108,
                     color: accent.withAlpha(25),
                     padding: const EdgeInsets.all(6),
-                    child: _portrait(),
+                    child: PokemonNetworkPortrait(url: pokemon.portraitUrl),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -91,7 +86,7 @@ class PokemonCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        pokemon.name,
+                        pokemon.name.toUpperCase(),
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -112,25 +107,14 @@ class PokemonCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(
-                  child: TextButton.icon(
-                    onPressed: onEdit,
-                    icon: const Icon(Icons.edit_outlined, size: 18),
-                    label: const Text('Edit'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF414B40),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: TextButton.icon(
-                    onPressed: onDelete,
-                    icon: const Icon(Icons.delete_outline, size: 18),
-                    label: const Text('Delete'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF9C4032),
-                    ),
+                TextButton.icon(
+                  onPressed: onDelete,
+                  icon: const Icon(Icons.delete_outline, size: 18),
+                  label: const Text('Delete'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF9C4032),
                   ),
                 ),
               ],
@@ -139,34 +123,6 @@ class PokemonCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Widget _portrait() {
-    final path = pokemon.imagePath;
-    final asset = pokemon.assetPath;
-    if (path != null) {
-      return Image.file(
-        File(path),
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => _placeholder(),
-      );
-    }
-    if (asset != null) {
-      return Image.asset(
-        asset,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => _placeholder(),
-      );
-    }
-    final officialData = pokemon.officialData;
-    if (officialData != null) {
-      return PokemonNetworkPortrait(url: officialData.portraitUrl);
-    }
-    return _placeholder();
-  }
-
-  Widget _placeholder() {
-    return Icon(Icons.catching_pokemon, color: _accent, size: 38);
   }
 
   Widget _stat(String label, int value) {
@@ -193,10 +149,7 @@ class PokemonCard extends StatelessWidget {
             child: Text(
               '$value',
               textAlign: TextAlign.end,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
         ],

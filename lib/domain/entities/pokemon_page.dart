@@ -4,8 +4,5 @@ class PokemonPage {
   final List<PokemonSummary> results;
   final bool hasMore;
 
-  const PokemonPage({
-    required this.results,
-    required this.hasMore,
-  });
+  const PokemonPage({required this.results, required this.hasMore});
 }

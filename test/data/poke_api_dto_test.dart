@@ -8,16 +8,38 @@ void main() {
       'id': 1,
       'name': 'bulbasaur',
       'types': [
-        {'type': {'name': 'grass'}},
-        {'type': {'name': 'poison'}},
+        {
+          'type': {'name': 'grass'},
+        },
+        {
+          'type': {'name': 'poison'},
+        },
       ],
       'stats': [
-        {'stat': {'name': 'hp'}, 'base_stat': 45},
-        {'stat': {'name': 'attack'}, 'base_stat': 49},
-        {'stat': {'name': 'defense'}, 'base_stat': 49},
-        {'stat': {'name': 'special-attack'}, 'base_stat': 65},
-        {'stat': {'name': 'special-defense'}, 'base_stat': 65},
-        {'stat': {'name': 'speed'}, 'base_stat': 45},
+        {
+          'stat': {'name': 'hp'},
+          'base_stat': 45,
+        },
+        {
+          'stat': {'name': 'attack'},
+          'base_stat': 49,
+        },
+        {
+          'stat': {'name': 'defense'},
+          'base_stat': 49,
+        },
+        {
+          'stat': {'name': 'special-attack'},
+          'base_stat': 65,
+        },
+        {
+          'stat': {'name': 'special-defense'},
+          'base_stat': 65,
+        },
+        {
+          'stat': {'name': 'speed'},
+          'base_stat': 45,
+        },
       ],
       'sprites': {'front_default': 'https://example.com/sprite.png'},
     });
