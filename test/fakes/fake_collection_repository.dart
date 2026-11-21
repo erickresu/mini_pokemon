@@ -9,9 +9,28 @@ class FakeCollectionRepository implements CollectionRepository {
       StreamController<List<Pokemon>>.broadcast();
 
   @override
-  Stream<List<Pokemon>> watchAll() async* {
-    yield List<Pokemon>.unmodifiable(_items);
-    yield* _controller.stream;
+  Stream<List<Pokemon>> watchAll() {
+    final controller = StreamController<List<Pokemon>>();
+    StreamSubscription<List<Pokemon>>? subscription;
+
+    controller.onListen = () {
+      subscription = _controller.stream.listen(
+        controller.add,
+        onError: controller.addError,
+        onDone: controller.close,
+      );
+      scheduleMicrotask(() {
+        if (!controller.isClosed) {
+          controller.add(List<Pokemon>.unmodifiable(_items));
+        }
+      });
+    };
+    controller.onCancel = () {
+      unawaited(subscription?.cancel());
+      return Future<void>.value();
+    };
+
+    return controller.stream;
   }
 
   @override
