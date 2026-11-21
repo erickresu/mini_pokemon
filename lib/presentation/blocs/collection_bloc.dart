@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/pokemon.dart';
@@ -25,6 +27,16 @@ class PokemonRemoved extends CollectionEvent {
   const PokemonRemoved(this.apiId);
 }
 
+class _CollectionUpdated extends CollectionEvent {
+  final List<Pokemon> pokemons;
+
+  const _CollectionUpdated(this.pokemons);
+}
+
+class _CollectionFailed extends CollectionEvent {
+  const _CollectionFailed();
+}
+
 abstract class CollectionState {
   const CollectionState();
 }
@@ -49,6 +61,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
   final CollectPokemon collect;
   final RemovePokemon remove;
 
+  StreamSubscription<List<Pokemon>>? _subscription;
   List<Pokemon> _current = const [];
 
   CollectionBloc({
@@ -59,6 +72,8 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     on<CollectionStarted>(_onStarted);
     on<PokemonCollected>(_onCollected);
     on<PokemonRemoved>(_onRemoved);
+    on<_CollectionUpdated>(_onUpdated);
+    on<_CollectionFailed>(_onFailed);
   }
 
   Future<void> _onStarted(
@@ -66,19 +81,26 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     Emitter<CollectionState> emit,
   ) async {
     emit(const CollectionLoading());
+    await _subscription?.cancel();
 
-    await emit.forEach<List<Pokemon>>(
-      watch(),
-      onData: (pokemons) {
-        _current = pokemons;
-        return CollectionReady(pokemons: pokemons);
+    _subscription = watch().listen(
+      (pokemons) {
+        if (!isClosed) add(_CollectionUpdated(pokemons));
       },
-      onError: (error, stackTrace) {
-        return CollectionReady(
-          pokemons: _current,
-          notice: 'Unable to load collection.',
-        );
+      onError: (Object error, StackTrace stackTrace) {
+        if (!isClosed) add(const _CollectionFailed());
       },
+    );
+  }
+
+  void _onUpdated(_CollectionUpdated event, Emitter<CollectionState> emit) {
+    _current = event.pokemons;
+    emit(CollectionReady(pokemons: _current));
+  }
+
+  void _onFailed(_CollectionFailed event, Emitter<CollectionState> emit) {
+    emit(
+      CollectionReady(pokemons: _current, notice: 'Unable to load collection.'),
     );
   }
 
@@ -109,5 +131,11 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     if (emit.isDone) return;
 
     emit(CollectionReady(pokemons: _current));
+  }
+
+  @override
+  Future<void> close() async {
+    await _subscription?.cancel();
+    await super.close();
   }
 }

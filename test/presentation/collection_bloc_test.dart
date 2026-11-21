@@ -43,4 +43,45 @@ void main() {
     await readyRemoved.timeout(const Duration(seconds: 1));
     await bloc.close();
   });
+
+  test(
+    'restarting does not create duplicate collection subscriptions',
+    () async {
+      final repo = FakeCollectionRepository();
+      final bloc = CollectionBloc(
+        watch: WatchCollection(repo),
+        collect: CollectPokemon(repo),
+        remove: RemovePokemon(repo),
+      );
+      var oneItemEmissions = 0;
+      final subscription = bloc.stream.listen((state) {
+        if (state is CollectionReady && state.pokemons.length == 1) {
+          oneItemEmissions++;
+        }
+      });
+
+      final firstReady = bloc.stream.firstWhere(
+        (s) => s is CollectionReady && s.pokemons.isEmpty,
+      );
+      bloc.add(CollectionStarted());
+      await firstReady.timeout(const Duration(seconds: 1));
+
+      final secondReady = bloc.stream.firstWhere(
+        (s) => s is CollectionReady && s.pokemons.isEmpty,
+      );
+      bloc.add(CollectionStarted());
+      await secondReady.timeout(const Duration(seconds: 1));
+
+      final oneItemReady = bloc.stream.firstWhere(
+        (s) => s is CollectionReady && s.pokemons.length == 1,
+      );
+      await repo.add(testPokemon());
+      await oneItemReady.timeout(const Duration(seconds: 1));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(oneItemEmissions, 1);
+      await subscription.cancel();
+      await bloc.close();
+    },
+  );
 }
