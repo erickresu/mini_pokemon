@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:mini_pokemon/services/poke_api_service.dart';
+import 'package:mini_pokemon/data/datasources/poke_api_service.dart';
 
 Future<void> main() async {
   final service = PokeApiService();
@@ -15,7 +15,10 @@ Future<void> main() async {
     stdout.writeln('HP: ${pokemon.hp}');
     stdout.writeln('Attack: ${pokemon.attack}');
     stdout.writeln('Defense: ${pokemon.defense}');
-    stdout.writeln('Image: ${pokemon.imageUrl}');
+    stdout.writeln('Special Attack: ${pokemon.specialAttack}');
+    stdout.writeln('Special Defense: ${pokemon.specialDefense}');
+    stdout.writeln('Speed: ${pokemon.speed}');
+    stdout.writeln('Portrait: ${pokemon.portraitUrl}');
   } catch (error) {
     stderr.writeln('Error: $error');
     exitCode = 1;
