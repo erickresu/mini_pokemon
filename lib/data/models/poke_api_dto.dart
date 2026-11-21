@@ -63,7 +63,7 @@ class PokeApiPokemonDto {
     return Pokemon(
       apiId: id,
       name: name,
-      types: List.unmodifiable(types),
+      types: List<String>.unmodifiable(types),
       hp: hp,
       attack: attack,
       defense: defense,
