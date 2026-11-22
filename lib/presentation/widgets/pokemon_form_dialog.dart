@@ -27,7 +27,6 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
   late final TextEditingController _specialAttack;
   late final TextEditingController _specialDefense;
   late final TextEditingController _speed;
-  late final TextEditingController _portraitUrl;
   String? _error;
 
   @override
@@ -42,7 +41,6 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
     _specialAttack = TextEditingController(text: '${pokemon.specialAttack}');
     _specialDefense = TextEditingController(text: '${pokemon.specialDefense}');
     _speed = TextEditingController(text: '${pokemon.speed}');
-    _portraitUrl = TextEditingController(text: pokemon.portraitUrl ?? '');
   }
 
   @override
@@ -55,7 +53,6 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
     _specialAttack.dispose();
     _specialDefense.dispose();
     _speed.dispose();
-    _portraitUrl.dispose();
     super.dispose();
   }
 
@@ -104,7 +101,6 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
         specialAttack: stats[3],
         specialDefense: stats[4],
         speed: stats[5],
-        portraitUrl: _portraitUrl.text.trim(),
       ),
     );
   }
@@ -135,12 +131,6 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
             _statField('Special Attack', _specialAttack),
             _statField('Special Defense', _specialDefense),
             _statField('Speed', _speed),
-            TextField(
-              controller: _portraitUrl,
-              decoration: const InputDecoration(
-                labelText: 'Portrait URL (optional)',
-              ),
-            ),
             if (_error != null)
               Text(_error!, style: const TextStyle(color: Color(0xFFBA4938))),
           ],

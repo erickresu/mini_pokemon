@@ -77,6 +77,7 @@ void main() {
     await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
 
+    expect(find.text('Portrait URL (optional)'), findsNothing);
     final nameField = find.byKey(const Key('edit-name'));
     expect(tester.widget<TextField>(nameField).controller!.text, 'bulbasaur');
 
@@ -86,6 +87,10 @@ void main() {
 
     expect(find.text('IVYSAUR'), findsOneWidget);
     expect(find.text('BULBASAUR'), findsNothing);
+    expect(
+      (await repo.watchAll().first).single.portraitUrl,
+      'https://example.com/artwork.png',
+    );
   });
 
   testWidgets('edit dialog leaves vertical space between fields', (
@@ -100,7 +105,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextField);
-    expect(fields, findsNWidgets(9));
+    expect(fields, findsNWidgets(8));
 
     for (var index = 0; index < fields.evaluate().length - 1; index++) {
       final current = tester.getRect(fields.at(index));
