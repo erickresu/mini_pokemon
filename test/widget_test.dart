@@ -123,6 +123,28 @@ void main() {
     expect(find.text('IVYSAUR'), findsNothing);
   });
 
+  testWidgets('typing shows prefix then substring suggestions', (tester) async {
+    await tester.pumpWidget(_app(FakeCollectionRepository()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Pokemon'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('search-field')), 'p');
+    await tester.pumpAndSettle();
+
+    expect(find.text('PIKACHU'), findsOneWidget);
+    expect(find.text('PICHU'), findsOneWidget);
+    expect(find.text('PSYDUCK'), findsOneWidget);
+    expect(find.text('AIPOM'), findsNothing);
+
+    await tester.enterText(find.byKey(const Key('search-field')), 'pi');
+    await tester.pumpAndSettle();
+
+    expect(find.text('PIKACHU'), findsOneWidget);
+    expect(find.text('PICHU'), findsOneWidget);
+    expect(find.text('PSYDUCK'), findsNothing);
+  });
+
   testWidgets('search finds a Pokemon without scrolling pages', (tester) async {
     await tester.pumpWidget(
       _app(

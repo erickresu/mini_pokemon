@@ -12,6 +12,7 @@ class FakeCatalogRepository implements PokemonCatalogRepository {
   final bool failNext;
   final bool failDetails;
   final String detailName;
+  final List<String> catalogNames;
 
   bool _firstFailed = false;
   bool _nextFailed = false;
@@ -22,11 +23,32 @@ class FakeCatalogRepository implements PokemonCatalogRepository {
     this.failNext = false,
     this.failDetails = false,
     this.detailName = 'bulbasaur',
+    this.catalogNames = const [
+      'bulbasaur',
+      'ivysaur',
+      'pikachu',
+      'pichu',
+      'psyduck',
+      'aipom',
+    ],
   });
 
   @override
   Future<PokemonPage> fetchPage({required int offset, int limit = 20}) async {
     offsets.add(offset);
+
+    if (limit > 20) {
+      return PokemonPage(
+        results: [
+          for (final name in catalogNames)
+            PokemonSummary(
+              name: name,
+              url: 'https://pokeapi.co/api/v2/pokemon/$name/',
+            ),
+        ],
+        hasMore: false,
+      );
+    }
 
     if (failFirst && offset == 0 && !_firstFailed) {
       _firstFailed = true;

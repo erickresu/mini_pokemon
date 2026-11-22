@@ -6,7 +6,7 @@ A Flutter/Dart training app that explores PokéAPI and builds a small in-memory 
 
 - The collection starts empty.
 - Create means **Collect**: open Discover, open a detail page, and press `Collect`.
-- Search finds any Pokémon by name from PokéAPI without paging.
+- Search is autocomplete: one typed character suggests names starting with it; two or more suggest names containing it. The full name list is fetched once from PokéAPI and filtered locally.
 - Edit changes name, types, six stats, and portrait URL on a collected entry. `apiId` stays fixed.
 - Favorite marks a collected entry. The Favorites tab shows only favorited entries.
 - Delete is local only; it never writes to PokéAPI.

@@ -30,6 +30,12 @@ class SearchCleared extends DiscoverEvent {
   const SearchCleared();
 }
 
+class SearchQueryChanged extends DiscoverEvent {
+  final String query;
+
+  const SearchQueryChanged(this.query);
+}
+
 abstract class DiscoverState {
   const DiscoverState();
 }
@@ -48,6 +54,7 @@ class DiscoverReady extends DiscoverState {
   final bool isLoadingMore;
   final String? errorMessage;
   final bool isSearch;
+  final String? query;
 
   const DiscoverReady({
     required this.results,
@@ -55,6 +62,7 @@ class DiscoverReady extends DiscoverState {
     this.isLoadingMore = false,
     this.errorMessage,
     this.isSearch = false,
+    this.query,
   });
 }
 
@@ -70,6 +78,8 @@ class DiscoverBloc extends Bloc<DiscoverEvent, DiscoverState> {
   final SearchPokemon search;
 
   String? _searchQuery;
+  List<PokemonSummary> _catalog = const [];
+  bool _catalogLoaded = false;
 
   DiscoverBloc({required this.fetchPage, required this.search})
     : super(const DiscoverInitial()) {
@@ -77,6 +87,7 @@ class DiscoverBloc extends Bloc<DiscoverEvent, DiscoverState> {
     on<LoadMore>(_onLoadMore);
     on<Retry>(_onRetry);
     on<SearchSubmitted>(_onSearchSubmitted);
+    on<SearchQueryChanged>(_onSearchQueryChanged);
     on<SearchCleared>(_onSearchCleared);
   }
 
@@ -156,6 +167,64 @@ class DiscoverBloc extends Bloc<DiscoverEvent, DiscoverState> {
 
     _searchQuery = query;
     await _runSearch(query, emit);
+  }
+
+  Future<void> _onSearchQueryChanged(
+    SearchQueryChanged event,
+    Emitter<DiscoverState> emit,
+  ) async {
+    final query = event.query.trim();
+    if (query.isEmpty) {
+      add(const SearchCleared());
+      return;
+    }
+
+    _searchQuery = query;
+
+    if (!_catalogLoaded) {
+      try {
+        final page = await fetchPage(offset: 0, limit: 2000);
+
+        if (emit.isDone) return;
+
+        _catalog = page.results;
+        _catalogLoaded = true;
+      } catch (_) {
+        if (emit.isDone) return;
+
+        emit(
+          DiscoverReady(
+            results: const [],
+            hasMore: false,
+            isSearch: true,
+            errorMessage: 'Unable to load suggestions.',
+            query: query,
+          ),
+        );
+        return;
+      }
+    }
+
+    _emitSuggestions(query, emit);
+  }
+
+  void _emitSuggestions(String query, Emitter<DiscoverState> emit) {
+    final needle = query.toLowerCase();
+    final matches = _catalog.where((summary) {
+      final name = summary.name.toLowerCase();
+      return needle.length == 1
+          ? name.startsWith(needle)
+          : name.contains(needle);
+    }).toList();
+
+    emit(
+      DiscoverReady(
+        results: matches,
+        hasMore: false,
+        isSearch: true,
+        query: query,
+      ),
+    );
   }
 
   void _onSearchCleared(SearchCleared event, Emitter<DiscoverState> emit) {

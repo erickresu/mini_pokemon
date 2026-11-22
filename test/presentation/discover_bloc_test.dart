@@ -160,4 +160,63 @@ void main() {
       await bloc.close();
     },
   );
+
+  test('one character suggests only names with that prefix', () async {
+    final catalog = FakeCatalogRepository();
+    final bloc = _bloc(catalog);
+
+    bloc.add(SearchQueryChanged('p'));
+    final state =
+        await bloc.stream
+                .firstWhere((s) => s is DiscoverReady && s.isSearch)
+                .timeout(const Duration(seconds: 1))
+            as DiscoverReady;
+
+    expect(state.results.map((item) => item.name), [
+      'pikachu',
+      'pichu',
+      'psyduck',
+    ]);
+    expect(state.results.any((item) => item.name == 'aipom'), isFalse);
+    await bloc.close();
+  });
+
+  test('two characters suggest names containing the text', () async {
+    final catalog = FakeCatalogRepository();
+    final bloc = _bloc(catalog);
+
+    bloc.add(SearchQueryChanged('pi'));
+    final state =
+        await bloc.stream
+                .firstWhere((s) => s is DiscoverReady && s.isSearch)
+                .timeout(const Duration(seconds: 1))
+            as DiscoverReady;
+
+    expect(state.results.map((item) => item.name), ['pikachu', 'pichu']);
+    await bloc.close();
+  });
+
+  test('a second keystroke reuses the cached name catalog', () async {
+    final catalog = FakeCatalogRepository();
+    final bloc = _bloc(catalog);
+
+    bloc.add(SearchQueryChanged('p'));
+    await bloc.stream
+        .firstWhere((s) => s is DiscoverReady && s.isSearch)
+        .timeout(const Duration(seconds: 1));
+
+    bloc.add(SearchQueryChanged('pi'));
+    final state =
+        await bloc.stream
+                .firstWhere(
+                  (s) =>
+                      s is DiscoverReady && s.isSearch && s.results.length == 2,
+                )
+                .timeout(const Duration(seconds: 1))
+            as DiscoverReady;
+
+    expect(state.results.map((item) => item.name), ['pikachu', 'pichu']);
+    expect(catalog.offsets, [0]);
+    await bloc.close();
+  });
 }

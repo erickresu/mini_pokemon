@@ -89,6 +89,8 @@ class _DiscoverViewState extends State<_DiscoverView> {
                 key: const Key('search-field'),
                 controller: _searchController,
                 textInputAction: TextInputAction.search,
+                onChanged: (value) =>
+                    context.read<DiscoverBloc>().add(SearchQueryChanged(value)),
                 onSubmitted: (_) => _submit(),
                 decoration: const InputDecoration(
                   hintText: 'Search by name',
@@ -132,6 +134,26 @@ class _DiscoverViewState extends State<_DiscoverView> {
 
     if (state is! DiscoverReady) {
       return const Center(child: Text('Unable to load Pokemon.'));
+    }
+
+    if (state.isSearch && state.results.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(state.errorMessage ?? 'No Pokemon found.'),
+            if (state.errorMessage != null && state.query != null) ...[
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () => context.read<DiscoverBloc>().add(
+                  SearchQueryChanged(state.query!),
+                ),
+                child: const Text('Retry'),
+              ),
+            ],
+          ],
+        ),
+      );
     }
 
     final results = state.results;
