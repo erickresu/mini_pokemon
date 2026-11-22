@@ -55,8 +55,9 @@ void main() {
 
   test('storage stays in the data layer behind a build flag', () {
     final main = File('lib/main.dart').readAsStringSync();
-    expect(main, contains("bool.fromEnvironment('USE_SQLITE')"));
+    expect(main, contains("const bool.fromEnvironment('USE_SQLITE')"));
     expect(main, contains('SqliteCollectionRepository'));
+    expect(main, isNot(contains('DEBUG USE_SQLITE')));
 
     for (final path in ['lib/domain', 'lib/presentation']) {
       for (final file in dartFiles(path)) {

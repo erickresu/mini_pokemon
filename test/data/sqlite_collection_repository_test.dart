@@ -84,6 +84,25 @@ void main() {
     expect(rows.single.name, 'wartortle');
   });
 
+  test('a failed write broadcasts an error to watchers', () async {
+    final iterator = StreamIterator<List<Pokemon>>(repository.watchAll());
+    addTearDown(iterator.cancel);
+
+    expect(await iterator.moveNext(), isTrue);
+    expect(iterator.current, isEmpty);
+
+    await database.execute(
+      'CREATE TRIGGER fail_insert BEFORE INSERT ON ${PokemonRow.table} '
+      "WHEN NEW.${PokemonRow.columnName} = 'fail' "
+      "BEGIN SELECT RAISE(ABORT, 'forced failure'); END",
+    );
+
+    final add = repository.add(sample(name: 'fail'));
+    final addError = expectLater(add, throwsA(isA<Object>()));
+    await expectLater(iterator.moveNext(), throwsA(isA<Object>()));
+    await addError;
+  });
+
   test('favorite flag is stored as zero or one', () async {
     await repository.add(sample(favorite: true));
 

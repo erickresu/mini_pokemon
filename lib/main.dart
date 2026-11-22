@@ -20,7 +20,7 @@ import 'presentation/pages/pokemon_list_page.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final useSqlite = bool.fromEnvironment('USE_SQLITE');
+  final useSqlite = const bool.fromEnvironment('USE_SQLITE');
   final collectionRepository = useSqlite
       ? SqliteCollectionRepository(await openPokemonDatabase())
       : InMemoryCollectionRepository();
