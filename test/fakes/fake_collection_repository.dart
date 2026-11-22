@@ -40,6 +40,15 @@ class FakeCollectionRepository implements CollectionRepository {
   }
 
   @override
+  Future<void> update(Pokemon pokemon) async {
+    final index = _items.indexWhere((item) => item.apiId == pokemon.apiId);
+    if (index == -1) return;
+
+    _items[index] = pokemon;
+    _controller.add(List.unmodifiable(_items));
+  }
+
+  @override
   Future<void> remove(int apiId) async {
     _items.removeWhere((pokemon) => pokemon.apiId == apiId);
     _controller.add(List.unmodifiable(_items));
