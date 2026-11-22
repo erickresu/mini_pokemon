@@ -11,6 +11,7 @@ class FakeCatalogRepository implements PokemonCatalogRepository {
   final bool failFirst;
   final bool failNext;
   final bool failDetails;
+  final String detailName;
 
   bool _firstFailed = false;
   bool _nextFailed = false;
@@ -20,6 +21,7 @@ class FakeCatalogRepository implements PokemonCatalogRepository {
     this.failFirst = false,
     this.failNext = false,
     this.failDetails = false,
+    this.detailName = 'bulbasaur',
   });
 
   @override
@@ -58,6 +60,6 @@ class FakeCatalogRepository implements PokemonCatalogRepository {
       throw Exception('Details failed.');
     }
 
-    return testPokemon();
+    return testPokemon().copyWith(name: detailName);
   }
 }

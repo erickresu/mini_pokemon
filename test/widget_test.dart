@@ -5,10 +5,13 @@ import 'package:mini_pokemon/main.dart';
 import 'fakes/fake_catalog_repository.dart';
 import 'fakes/fake_collection_repository.dart';
 
-Widget _app(FakeCollectionRepository collection) {
+Widget _app(
+  FakeCollectionRepository collection, {
+  FakeCatalogRepository? catalog,
+}) {
   return MyApp(
     collectionRepository: collection,
-    catalogRepository: FakeCatalogRepository(),
+    catalogRepository: catalog ?? FakeCatalogRepository(),
   );
 }
 
@@ -38,7 +41,7 @@ void main() {
 
     await tester.tap(find.text('Add Pokemon'));
     await tester.pumpAndSettle();
-    expect(find.text('Discover Pokemon'), findsOneWidget);
+    expect(find.byKey(const Key('search-field')), findsOneWidget);
   });
 
   testWidgets('delete removes a Pokemon from the local collection', (
@@ -118,6 +121,35 @@ void main() {
     expect(find.text('1 Pokemon'), findsOneWidget);
     expect(find.text('BULBASAUR'), findsOneWidget);
     expect(find.text('IVYSAUR'), findsNothing);
+  });
+
+  testWidgets('search finds a Pokemon without scrolling pages', (tester) async {
+    await tester.pumpWidget(
+      _app(
+        FakeCollectionRepository(),
+        catalog: FakeCatalogRepository(detailName: 'ivysaur'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Pokemon'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('search-field')), 'ivysaur');
+    await tester.tap(find.text('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('IVYSAUR'), findsOneWidget);
+    expect(find.text('BULBASAUR'), findsNothing);
+    expect(find.text('Load more'), findsNothing);
+    expect(find.text('Clear'), findsOneWidget);
+
+    await tester.tap(find.text('IVYSAUR'));
+    await tester.pumpAndSettle();
+    expect(find.text('Special Attack'), findsOneWidget);
+
+    await tester.tap(find.text('Collect'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('1 Pokemon'), findsOneWidget);
   });
 
   testWidgets('discovers, collects, and deletes from collection', (

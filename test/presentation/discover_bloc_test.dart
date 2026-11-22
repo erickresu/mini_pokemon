@@ -97,9 +97,10 @@ void main() {
 
     bloc.add(SearchSubmitted('bulbasaur'));
     final state =
-        await bloc.stream.firstWhere((s) => s is DiscoverReady).timeout(
-          const Duration(seconds: 1),
-        ) as DiscoverReady;
+        await bloc.stream
+                .firstWhere((s) => s is DiscoverReady)
+                .timeout(const Duration(seconds: 1))
+            as DiscoverReady;
 
     expect(state.results.single.name, 'bulbasaur');
     expect(state.isSearch, isTrue);
@@ -114,42 +115,49 @@ void main() {
 
     bloc.add(SearchSubmitted('missingno'));
     final state =
-        await bloc.stream.firstWhere((s) => s is DiscoverFailure).timeout(
-          const Duration(seconds: 1),
-        ) as DiscoverFailure;
+        await bloc.stream
+                .firstWhere((s) => s is DiscoverFailure)
+                .timeout(const Duration(seconds: 1))
+            as DiscoverFailure;
 
     expect(state.message, 'Unable to find Pokemon.');
     expect(state.isSearch, isTrue);
     await bloc.close();
   });
 
-  test('search retry repeats the same query and clear restarts paging', () async {
-    final catalog = FakeCatalogRepository(failDetails: true);
-    final bloc = _bloc(catalog);
+  test(
+    'search retry repeats the same query and clear restarts paging',
+    () async {
+      final catalog = FakeCatalogRepository(failDetails: true);
+      final bloc = _bloc(catalog);
 
-    bloc.add(SearchSubmitted('missingno'));
-    final failure =
-        await bloc.stream.firstWhere((s) => s is DiscoverFailure).timeout(
-          const Duration(seconds: 1),
-        ) as DiscoverFailure;
-    expect(failure.isSearch, isTrue);
-    expect(catalog.names, ['missingno']);
+      bloc.add(SearchSubmitted('missingno'));
+      final failure =
+          await bloc.stream
+                  .firstWhere((s) => s is DiscoverFailure)
+                  .timeout(const Duration(seconds: 1))
+              as DiscoverFailure;
+      expect(failure.isSearch, isTrue);
+      expect(catalog.names, ['missingno']);
 
-    bloc.add(Retry());
-    final searched =
-        await bloc.stream
-            .firstWhere((s) => s is DiscoverReady && s.isSearch)
-            .timeout(const Duration(seconds: 1)) as DiscoverReady;
-    expect(searched.results, hasLength(1));
-    expect(catalog.names, ['missingno', 'missingno']);
+      bloc.add(Retry());
+      final searched =
+          await bloc.stream
+                  .firstWhere((s) => s is DiscoverReady && s.isSearch)
+                  .timeout(const Duration(seconds: 1))
+              as DiscoverReady;
+      expect(searched.results, hasLength(1));
+      expect(catalog.names, ['missingno', 'missingno']);
 
-    bloc.add(SearchCleared());
-    final paged =
-        await bloc.stream
-            .firstWhere((s) => s is DiscoverReady && !s.isSearch)
-            .timeout(const Duration(seconds: 1)) as DiscoverReady;
-    expect(paged.hasMore, isTrue);
-    expect(catalog.offsets, [0]);
-    await bloc.close();
-  });
+      bloc.add(SearchCleared());
+      final paged =
+          await bloc.stream
+                  .firstWhere((s) => s is DiscoverReady && !s.isSearch)
+                  .timeout(const Duration(seconds: 1))
+              as DiscoverReady;
+      expect(paged.hasMore, isTrue);
+      expect(catalog.offsets, [0]);
+      await bloc.close();
+    },
+  );
 }

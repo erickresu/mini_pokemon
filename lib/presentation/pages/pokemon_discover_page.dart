@@ -29,8 +29,21 @@ class PokemonDiscoverPage extends StatelessWidget {
   }
 }
 
-class _DiscoverView extends StatelessWidget {
+class _DiscoverView extends StatefulWidget {
   const _DiscoverView();
+
+  @override
+  State<_DiscoverView> createState() => _DiscoverViewState();
+}
+
+class _DiscoverViewState extends State<_DiscoverView> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   Future<void> _openDetail(BuildContext context, PokemonSummary summary) async {
     final collectionBloc = context.read<CollectionBloc>();
@@ -47,61 +60,101 @@ class _DiscoverView extends StatelessWidget {
     Navigator.of(context).pop();
   }
 
+  void _submit() {
+    final query = _searchController.text.trim();
+    if (query.isEmpty) return;
+
+    context.read<DiscoverBloc>().add(SearchSubmitted(query));
+  }
+
+  void _clear() {
+    _searchController.clear();
+    context.read<DiscoverBloc>().add(const SearchCleared());
+  }
+
+  bool _isSearching(DiscoverState state) {
+    return (state is DiscoverReady && state.isSearch) ||
+        (state is DiscoverFailure && state.isSearch);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Discover Pokemon')),
-      body: BlocBuilder<DiscoverBloc, DiscoverState>(
-        builder: (context, state) {
-          if (state is DiscoverInitial || state is DiscoverLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state is DiscoverFailure) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(state.message),
-                  const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: () => context.read<DiscoverBloc>().add(Retry()),
-                    child: const Text('Retry'),
-                  ),
-                ],
+    return BlocBuilder<DiscoverBloc, DiscoverState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: SizedBox(
+              height: 40,
+              child: TextField(
+                key: const Key('search-field'),
+                controller: _searchController,
+                textInputAction: TextInputAction.search,
+                onSubmitted: (_) => _submit(),
+                decoration: const InputDecoration(
+                  hintText: 'Search by name',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                ),
               ),
-            );
-          }
+            ),
+            actions: [
+              TextButton(onPressed: _submit, child: const Text('Search')),
+              if (_isSearching(state))
+                TextButton(onPressed: _clear, child: const Text('Clear')),
+            ],
+          ),
+          body: _body(context, state),
+        );
+      },
+    );
+  }
 
-          if (state is! DiscoverReady) {
-            return const Center(child: Text('Unable to load Pokemon.'));
-          }
+  Widget _body(BuildContext context, DiscoverState state) {
+    if (state is DiscoverInitial || state is DiscoverLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-          final results = state.results;
-          final showFooter =
-              state.hasMore ||
-              state.isLoadingMore ||
-              state.errorMessage != null;
+    if (state is DiscoverFailure) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(state.message),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () => context.read<DiscoverBloc>().add(Retry()),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
 
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            itemCount: results.length + (showFooter ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == results.length) {
-                return _footer(context, state);
-              }
+    if (state is! DiscoverReady) {
+      return const Center(child: Text('Unable to load Pokemon.'));
+    }
 
-              final summary = results[index];
-              return ListTile(
-                leading: const Icon(Icons.catching_pokemon),
-                title: Text(summary.name.toUpperCase()),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _openDetail(context, summary),
-              );
-            },
-          );
-        },
-      ),
+    final results = state.results;
+    final showFooter =
+        !state.isSearch &&
+        (state.hasMore || state.isLoadingMore || state.errorMessage != null);
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      itemCount: results.length + (showFooter ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == results.length) {
+          return _footer(context, state);
+        }
+
+        final summary = results[index];
+        return ListTile(
+          leading: const Icon(Icons.catching_pokemon),
+          title: Text(summary.name.toUpperCase()),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => _openDetail(context, summary),
+        );
+      },
     );
   }
 

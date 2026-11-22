@@ -158,10 +158,7 @@ class DiscoverBloc extends Bloc<DiscoverEvent, DiscoverState> {
     await _runSearch(query, emit);
   }
 
-  void _onSearchCleared(
-    SearchCleared event,
-    Emitter<DiscoverState> emit,
-  ) {
+  void _onSearchCleared(SearchCleared event, Emitter<DiscoverState> emit) {
     _searchQuery = null;
     add(const DiscoverStarted());
   }
@@ -174,13 +171,7 @@ class DiscoverBloc extends Bloc<DiscoverEvent, DiscoverState> {
 
       if (emit.isDone) return;
 
-      emit(
-        DiscoverReady(
-          results: [summary],
-          hasMore: false,
-          isSearch: true,
-        ),
-      );
+      emit(DiscoverReady(results: [summary], hasMore: false, isSearch: true));
     } catch (_) {
       if (emit.isDone) return;
 
