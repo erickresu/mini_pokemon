@@ -142,7 +142,14 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     PokemonCollected event,
     Emitter<CollectionState> emit,
   ) async {
-    final added = await collect(event.pokemon);
+    late final bool added;
+    try {
+      added = await collect(event.pokemon);
+    } catch (_) {
+      if (emit.isDone) return;
+      _emitReady(emit, notice: 'Unable to save collection.');
+      return;
+    }
 
     if (emit.isDone) return;
 
@@ -162,7 +169,13 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     PokemonUpdated event,
     Emitter<CollectionState> emit,
   ) async {
-    await update(event.pokemon);
+    try {
+      await update(event.pokemon);
+    } catch (_) {
+      if (emit.isDone) return;
+      _emitReady(emit, notice: 'Unable to save collection.');
+      return;
+    }
 
     if (emit.isDone) return;
 
@@ -180,7 +193,13 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     final toggled = event.pokemon.copyWith(
       isFavorite: !event.pokemon.isFavorite,
     );
-    await toggleFavorite(event.pokemon);
+    try {
+      await toggleFavorite(event.pokemon);
+    } catch (_) {
+      if (emit.isDone) return;
+      _emitReady(emit, notice: 'Unable to save collection.');
+      return;
+    }
 
     if (emit.isDone) return;
 
@@ -195,7 +214,13 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     PokemonRemoved event,
     Emitter<CollectionState> emit,
   ) async {
-    await remove(event.apiId);
+    try {
+      await remove(event.apiId);
+    } catch (_) {
+      if (emit.isDone) return;
+      _emitReady(emit, notice: 'Unable to save collection.');
+      return;
+    }
 
     if (emit.isDone) return;
 

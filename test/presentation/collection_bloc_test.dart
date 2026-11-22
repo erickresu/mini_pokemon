@@ -112,6 +112,96 @@ void main() {
     await bloc.close();
   });
 
+  test('collect write failure keeps the collection unchanged', () async {
+    final repo = FakeCollectionRepository()..failAdd = true;
+    final bloc = _bloc(repo);
+    final ready = bloc.stream.firstWhere(
+      (s) => s is CollectionReady && s.pokemons.isEmpty,
+    );
+    bloc.add(CollectionStarted());
+    await ready.timeout(const Duration(seconds: 1));
+
+    final failed = bloc.stream.firstWhere(
+      (s) => s is CollectionReady && s.notice == 'Unable to save collection.',
+    );
+    bloc.add(PokemonCollected(testPokemon()));
+    final state = await failed.timeout(
+      const Duration(seconds: 1),
+    ) as CollectionReady;
+
+    expect(state.pokemons, isEmpty);
+    await bloc.close();
+  });
+
+  test('update write failure keeps the old values', () async {
+    final repo = FakeCollectionRepository();
+    await repo.add(testPokemon());
+    repo.failUpdate = true;
+    final bloc = _bloc(repo);
+    final ready = bloc.stream.firstWhere(
+      (s) => s is CollectionReady && s.pokemons.length == 1,
+    );
+    bloc.add(CollectionStarted());
+    await ready.timeout(const Duration(seconds: 1));
+
+    final failed = bloc.stream.firstWhere(
+      (s) => s is CollectionReady && s.notice == 'Unable to save collection.',
+    );
+    bloc.add(PokemonUpdated(testPokemon().copyWith(name: 'Ivysaur')));
+    final state = await failed.timeout(
+      const Duration(seconds: 1),
+    ) as CollectionReady;
+
+    expect(state.pokemons.single.name, 'bulbasaur');
+    await bloc.close();
+  });
+
+  test('favorite write failure keeps the old flag', () async {
+    final repo = FakeCollectionRepository();
+    await repo.add(testPokemon());
+    repo.failUpdate = true;
+    final bloc = _bloc(repo);
+    final ready = bloc.stream.firstWhere(
+      (s) => s is CollectionReady && s.pokemons.length == 1,
+    );
+    bloc.add(CollectionStarted());
+    await ready.timeout(const Duration(seconds: 1));
+
+    final failed = bloc.stream.firstWhere(
+      (s) => s is CollectionReady && s.notice == 'Unable to save collection.',
+    );
+    bloc.add(PokemonFavoriteToggled(testPokemon()));
+    final state = await failed.timeout(
+      const Duration(seconds: 1),
+    ) as CollectionReady;
+
+    expect(state.pokemons.single.isFavorite, isFalse);
+    await bloc.close();
+  });
+
+  test('remove write failure keeps the Pokemon', () async {
+    final repo = FakeCollectionRepository();
+    await repo.add(testPokemon());
+    repo.failRemove = true;
+    final bloc = _bloc(repo);
+    final ready = bloc.stream.firstWhere(
+      (s) => s is CollectionReady && s.pokemons.length == 1,
+    );
+    bloc.add(CollectionStarted());
+    await ready.timeout(const Duration(seconds: 1));
+
+    final failed = bloc.stream.firstWhere(
+      (s) => s is CollectionReady && s.notice == 'Unable to save collection.',
+    );
+    bloc.add(const PokemonRemoved(1));
+    final state = await failed.timeout(
+      const Duration(seconds: 1),
+    ) as CollectionReady;
+
+    expect(state.pokemons, hasLength(1));
+    await bloc.close();
+  });
+
   test(
     'favorites filter hides non favorites and survives stream updates',
     () async {

@@ -4,6 +4,10 @@ import 'package:mini_pokemon/domain/entities/pokemon.dart';
 import 'package:mini_pokemon/domain/repositories/collection_repository.dart';
 
 class FakeCollectionRepository implements CollectionRepository {
+  bool failAdd = false;
+  bool failUpdate = false;
+  bool failRemove = false;
+
   final List<Pokemon> _items = [];
   final StreamController<List<Pokemon>> _controller =
       StreamController<List<Pokemon>>.broadcast();
@@ -35,12 +39,14 @@ class FakeCollectionRepository implements CollectionRepository {
 
   @override
   Future<void> add(Pokemon pokemon) async {
+    if (failAdd) throw StateError('add failed');
     _items.add(pokemon);
     _controller.add(List.unmodifiable(_items));
   }
 
   @override
   Future<void> update(Pokemon pokemon) async {
+    if (failUpdate) throw StateError('update failed');
     final index = _items.indexWhere((item) => item.apiId == pokemon.apiId);
     if (index == -1) return;
 
@@ -50,6 +56,7 @@ class FakeCollectionRepository implements CollectionRepository {
 
   @override
   Future<void> remove(int apiId) async {
+    if (failRemove) throw StateError('remove failed');
     _items.removeWhere((pokemon) => pokemon.apiId == apiId);
     _controller.add(List.unmodifiable(_items));
   }
