@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+
 import 'package:mini_pokemon/main.dart';
 
 import 'fakes/fake_catalog_repository.dart';
@@ -268,4 +269,26 @@ void main() {
     expect(find.text('0 Pokemon'), findsOneWidget);
     repo.dispose();
   });
+
+  testWidgets(
+    'sqlite startup failure shows error and allows in-memory fallback',
+    (tester) async {
+      await tester.pumpWidget(
+        MyApp(
+          catalogRepository: FakeCatalogRepository(),
+          startupError:
+              'Unable to open local storage. Running in memory this session.',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'Unable to open local storage. Running in memory this session.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('0 Pokemon'), findsOneWidget);
+    },
+  );
 }

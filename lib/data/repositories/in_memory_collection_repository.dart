@@ -35,6 +35,7 @@ class InMemoryCollectionRepository implements CollectionRepository {
 
   @override
   Future<void> add(Pokemon pokemon) async {
+    if (_items.any((item) => item.apiId == pokemon.apiId)) return;
     _items.add(pokemon);
     _controller.add(List.unmodifiable(_items));
   }

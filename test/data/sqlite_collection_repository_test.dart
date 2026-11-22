@@ -84,7 +84,7 @@ void main() {
     expect(rows.single.name, 'wartortle');
   });
 
-  test('a failed write broadcasts an error to watchers', () async {
+  test('a failed write rethrows and keeps repository usable', () async {
     final iterator = StreamIterator<List<Pokemon>>(repository.watchAll());
     addTearDown(iterator.cancel);
 
@@ -97,10 +97,15 @@ void main() {
       "BEGIN SELECT RAISE(ABORT, 'forced failure'); END",
     );
 
-    final add = repository.add(sample(name: 'fail'));
-    final addError = expectLater(add, throwsA(isA<Object>()));
-    await expectLater(iterator.moveNext(), throwsA(isA<Object>()));
-    await addError;
+    await expectLater(
+      repository.add(sample(name: 'fail')),
+      throwsA(isA<Object>()),
+    );
+
+    final afterAdd = iterator.moveNext();
+    await repository.add(sample(name: 'wartortle'));
+    expect(await afterAdd, isTrue);
+    expect(iterator.current.single.name, 'wartortle');
   });
 
   test('favorite flag is stored as zero or one', () async {

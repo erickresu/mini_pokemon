@@ -21,41 +21,74 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final useSqlite = const bool.fromEnvironment('USE_SQLITE');
-  final collectionRepository = useSqlite
-      ? SqliteCollectionRepository(await openPokemonDatabase())
-      : InMemoryCollectionRepository();
+  CollectionRepository? collectionRepository;
+  String? startupError;
+  if (useSqlite) {
+    try {
+      collectionRepository = SqliteCollectionRepository(
+        await openPokemonDatabase(),
+      );
+    } catch (_) {
+      startupError =
+          'Unable to open local storage. Running in memory this session.';
+    }
+  }
+  collectionRepository ??= InMemoryCollectionRepository();
   final catalogRepository = PokeApiCatalogRepository(PokeApiService());
 
   runApp(
     MyApp(
       collectionRepository: collectionRepository,
       catalogRepository: catalogRepository,
+      startupError: startupError,
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({
     super.key,
-    required this.collectionRepository,
     required this.catalogRepository,
+    this.collectionRepository,
+    this.startupError,
   });
 
-  final CollectionRepository collectionRepository;
   final PokemonCatalogRepository catalogRepository;
+  final CollectionRepository? collectionRepository;
+  final String? startupError;
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late CollectionRepository _collectionRepository;
+  String? _startupError;
+
+  @override
+  void initState() {
+    super.initState();
+    _collectionRepository =
+        widget.collectionRepository ?? InMemoryCollectionRepository();
+    _startupError = widget.startupError;
+  }
+
+  void _dismissStartupError() {
+    setState(() => _startupError = null);
+  }
 
   @override
   Widget build(BuildContext context) {
     return RepositoryProvider<PokemonCatalogRepository>.value(
-      value: catalogRepository,
+      value: widget.catalogRepository,
       child: BlocProvider<CollectionBloc>(
         create: (context) {
           final bloc = CollectionBloc(
-            watch: WatchCollection(collectionRepository),
-            collect: CollectPokemon(collectionRepository),
-            remove: RemovePokemon(collectionRepository),
-            update: UpdatePokemon(collectionRepository),
-            toggleFavorite: ToggleFavorite(collectionRepository),
+            watch: WatchCollection(_collectionRepository),
+            collect: CollectPokemon(_collectionRepository),
+            remove: RemovePokemon(_collectionRepository),
+            update: UpdatePokemon(_collectionRepository),
+            toggleFavorite: ToggleFavorite(_collectionRepository),
           )..add(const CollectionStarted());
           return bloc;
         },
@@ -63,7 +96,10 @@ class MyApp extends StatelessWidget {
           title: 'Mini Pokemon',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(),
-          home: const PokemonListPage(),
+          home: PokemonListPage(
+            startupError: _startupError,
+            onDismissStartupError: _dismissStartupError,
+          ),
         ),
       ),
     );

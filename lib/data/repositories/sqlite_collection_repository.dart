@@ -84,13 +84,7 @@ class SqliteCollectionRepository implements CollectionRepository {
   Future<void> _write(Future<int> Function() operation) async {
     _revision++;
 
-    try {
-      await operation();
-    } catch (error) {
-      if (!_controller.isClosed) _controller.addError(error);
-      rethrow;
-    }
-
+    await operation();
     await _publish();
   }
 

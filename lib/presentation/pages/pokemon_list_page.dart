@@ -8,7 +8,14 @@ import '../widgets/pokemon_form_dialog.dart';
 import 'pokemon_discover_page.dart';
 
 class PokemonListPage extends StatelessWidget {
-  const PokemonListPage({super.key});
+  const PokemonListPage({
+    super.key,
+    this.startupError,
+    this.onDismissStartupError,
+  });
+
+  final String? startupError;
+  final VoidCallback? onDismissStartupError;
 
   Future<void> _confirmDelete(BuildContext context, Pokemon pokemon) async {
     final confirmed = await showDialog<bool>(
@@ -122,6 +129,20 @@ class PokemonListPage extends StatelessWidget {
 
     return Column(
       children: [
+        if (startupError != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: MaterialBanner(
+              content: Text(startupError!),
+              leading: const Icon(Icons.warning_amber_rounded),
+              actions: [
+                TextButton(
+                  onPressed: onDismissStartupError,
+                  child: const Text('Dismiss'),
+                ),
+              ],
+            ),
+          ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           child: Align(
