@@ -9,6 +9,8 @@ import 'domain/repositories/collection_repository.dart';
 import 'domain/repositories/pokemon_catalog_repository.dart';
 import 'domain/usecases/collect_pokemon.dart';
 import 'domain/usecases/remove_pokemon.dart';
+import 'domain/usecases/toggle_favorite.dart';
+import 'domain/usecases/update_pokemon.dart';
 import 'domain/usecases/watch_collection.dart';
 import 'presentation/blocs/collection_bloc.dart';
 import 'presentation/pages/pokemon_list_page.dart';
@@ -45,6 +47,8 @@ class MyApp extends StatelessWidget {
             watch: WatchCollection(collectionRepository),
             collect: CollectPokemon(collectionRepository),
             remove: RemovePokemon(collectionRepository),
+            update: UpdatePokemon(collectionRepository),
+            toggleFavorite: ToggleFavorite(collectionRepository),
           )..add(const CollectionStarted());
           return bloc;
         },
