@@ -48,8 +48,8 @@ void main() {
     }
   });
 
-  test('manual form and bundled starter art are gone', () {
-    expect(File('lib/widgets/pokemon_form_dialog.dart').existsSync(), isFalse);
+  test('old manual form path and bundled starter art are gone', () {
+    expect(Directory('lib/widgets').existsSync(), isFalse);
     expect(Directory('assets/pokemon').existsSync(), isFalse);
   });
 }

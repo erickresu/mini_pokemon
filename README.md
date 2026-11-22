@@ -6,10 +6,13 @@ A Flutter/Dart training app that explores PokéAPI and builds a small in-memory 
 
 - The collection starts empty.
 - Create means **Collect**: open Discover, open a detail page, and press `Collect`.
+- Search finds any Pokémon by name from PokéAPI without paging.
+- Edit changes name, types, six stats, and portrait URL on a collected entry. `apiId` stays fixed.
+- Favorite marks a collected entry. The Favorites tab shows only favorited entries.
 - Delete is local only; it never writes to PokéAPI.
-- No manual add form, edit form, image picker, seeded starters, or bundled Pokémon art.
+- No manual create form, image picker, seeded starters, or bundled Pokémon art.
 - No database, persistence, backend, or writes to the API.
-- PokéAPI is the only source of Pokémon data.
+- PokéAPI is the only source for new Pokémon data. Edits and favorites are local.
 
 ## Run and verify
 
@@ -35,7 +38,7 @@ Use an actual device ID from `flutter devices`. On this machine, use Windows Pow
 - `lib/data/repositories/`: in-memory collection repository and PokéAPI catalog repository.
 - `lib/presentation/blocs/`: `CollectionBloc`, `DiscoverBloc`, `DetailBloc`.
 - `lib/presentation/pages/`: collection, discover, and detail pages.
-- `lib/presentation/widgets/`: presentation-only card and network portrait.
+- `lib/presentation/widgets/`: card, network portrait, and edit form dialog.
 - `test/fakes/`: repository fakes used by unit and widget tests.
 - `test/layer_boundaries_test.dart`: guard against inward dependency violations.
 
@@ -43,7 +46,7 @@ Dependencies point inward: `presentation` and `data` depend on `domain`; `domain
 
 ## Verification
 
-`flutter analyze` is clean and `flutter test` passes, including unit tests for use cases and BLoCs, a full widget flow, and a layer-boundary guard. Emulator checks were not run on this branch; do not claim live device verification.
+`flutter analyze` is clean and `flutter test` passes, including unit tests for use cases and BLoCs, edit/favorite/search widget flows, and a layer-boundary guard. Emulator checks were not run on this branch; do not claim live device verification.
 
 Study [the Flutter reviewer](learning/FLUTTER_REVIEWER.md) for the current layers, events, states, and data flow.
 
