@@ -5,6 +5,7 @@ import '../../domain/entities/pokemon.dart';
 import '../../domain/entities/pokemon_summary.dart';
 import '../../domain/repositories/pokemon_catalog_repository.dart';
 import '../../domain/usecases/fetch_pokemon_page.dart';
+import '../../domain/usecases/search_pokemon.dart';
 import '../blocs/collection_bloc.dart';
 import '../blocs/discover_bloc.dart';
 import 'pokemon_detail_page.dart';
@@ -16,8 +17,10 @@ class PokemonDiscoverPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<DiscoverBloc>(
       create: (context) {
+        final catalog = context.read<PokemonCatalogRepository>();
         final bloc = DiscoverBloc(
-          fetchPage: FetchPokemonPage(context.read<PokemonCatalogRepository>()),
+          fetchPage: FetchPokemonPage(catalog),
+          search: SearchPokemon(catalog),
         )..add(const DiscoverStarted());
         return bloc;
       },

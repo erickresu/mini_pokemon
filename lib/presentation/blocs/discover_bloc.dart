@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/pokemon_summary.dart';
 import '../../domain/usecases/fetch_pokemon_page.dart';
+import '../../domain/usecases/search_pokemon.dart';
 
 abstract class DiscoverEvent {
   const DiscoverEvent();
@@ -17,6 +18,16 @@ class LoadMore extends DiscoverEvent {
 
 class Retry extends DiscoverEvent {
   const Retry();
+}
+
+class SearchSubmitted extends DiscoverEvent {
+  final String query;
+
+  const SearchSubmitted(this.query);
+}
+
+class SearchCleared extends DiscoverEvent {
+  const SearchCleared();
 }
 
 abstract class DiscoverState {
@@ -36,28 +47,37 @@ class DiscoverReady extends DiscoverState {
   final bool hasMore;
   final bool isLoadingMore;
   final String? errorMessage;
+  final bool isSearch;
 
   const DiscoverReady({
     required this.results,
     required this.hasMore,
     this.isLoadingMore = false,
     this.errorMessage,
+    this.isSearch = false,
   });
 }
 
 class DiscoverFailure extends DiscoverState {
   final String message;
+  final bool isSearch;
 
-  const DiscoverFailure(this.message);
+  const DiscoverFailure(this.message, {this.isSearch = false});
 }
 
 class DiscoverBloc extends Bloc<DiscoverEvent, DiscoverState> {
   final FetchPokemonPage fetchPage;
+  final SearchPokemon search;
 
-  DiscoverBloc({required this.fetchPage}) : super(const DiscoverInitial()) {
+  String? _searchQuery;
+
+  DiscoverBloc({required this.fetchPage, required this.search})
+    : super(const DiscoverInitial()) {
     on<DiscoverStarted>(_onStarted);
     on<LoadMore>(_onLoadMore);
     on<Retry>(_onRetry);
+    on<SearchSubmitted>(_onSearchSubmitted);
+    on<SearchCleared>(_onSearchCleared);
   }
 
   Future<void> _onStarted(
@@ -96,6 +116,11 @@ class DiscoverBloc extends Bloc<DiscoverEvent, DiscoverState> {
   Future<void> _onRetry(Retry event, Emitter<DiscoverState> emit) async {
     final current = state;
 
+    if (current is DiscoverFailure && current.isSearch) {
+      await _runSearch(_searchQuery ?? '', emit);
+      return;
+    }
+
     if (current is DiscoverReady) {
       if (current.isLoadingMore || !current.hasMore) return;
 
@@ -119,6 +144,47 @@ class DiscoverBloc extends Bloc<DiscoverEvent, DiscoverState> {
     if (current is DiscoverFailure) {
       emit(const DiscoverLoading());
       await _fetch(offset: 0, results: const [], hasMore: true, emit: emit);
+    }
+  }
+
+  Future<void> _onSearchSubmitted(
+    SearchSubmitted event,
+    Emitter<DiscoverState> emit,
+  ) async {
+    final query = event.query.trim();
+    if (query.isEmpty) return;
+
+    _searchQuery = query;
+    await _runSearch(query, emit);
+  }
+
+  void _onSearchCleared(
+    SearchCleared event,
+    Emitter<DiscoverState> emit,
+  ) {
+    _searchQuery = null;
+    add(const DiscoverStarted());
+  }
+
+  Future<void> _runSearch(String query, Emitter<DiscoverState> emit) async {
+    emit(const DiscoverLoading());
+
+    try {
+      final summary = await search(query);
+
+      if (emit.isDone) return;
+
+      emit(
+        DiscoverReady(
+          results: [summary],
+          hasMore: false,
+          isSearch: true,
+        ),
+      );
+    } catch (_) {
+      if (emit.isDone) return;
+
+      emit(const DiscoverFailure('Unable to find Pokemon.', isSearch: true));
     }
   }
 
