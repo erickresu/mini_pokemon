@@ -7,7 +7,11 @@ import 'package:mini_pokemon/data/repositories/sqlite_collection_repository.dart
 import 'package:mini_pokemon/domain/entities/pokemon.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-Pokemon sample({int apiId = 7, String name = 'wartortle', bool favorite = false}) {
+Pokemon sample({
+  int apiId = 7,
+  String name = 'wartortle',
+  bool favorite = false,
+}) {
   return Pokemon(
     apiId: apiId,
     name: name,

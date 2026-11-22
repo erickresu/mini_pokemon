@@ -3,8 +3,10 @@ import 'package:material_ui/material_ui.dart';
 
 import 'core/theme/app_theme.dart';
 import 'data/datasources/poke_api_service.dart';
+import 'data/datasources/pokemon_database.dart';
 import 'data/repositories/in_memory_collection_repository.dart';
 import 'data/repositories/poke_api_catalog_repository.dart';
+import 'data/repositories/sqlite_collection_repository.dart';
 import 'domain/repositories/collection_repository.dart';
 import 'domain/repositories/pokemon_catalog_repository.dart';
 import 'domain/usecases/collect_pokemon.dart';
@@ -15,8 +17,13 @@ import 'domain/usecases/watch_collection.dart';
 import 'presentation/blocs/collection_bloc.dart';
 import 'presentation/pages/pokemon_list_page.dart';
 
-void main() {
-  final collectionRepository = InMemoryCollectionRepository();
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final useSqlite = bool.fromEnvironment('USE_SQLITE');
+  final collectionRepository = useSqlite
+      ? SqliteCollectionRepository(await openPokemonDatabase())
+      : InMemoryCollectionRepository();
   final catalogRepository = PokeApiCatalogRepository(PokeApiService());
 
   runApp(

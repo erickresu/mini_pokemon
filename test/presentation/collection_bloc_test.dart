@@ -125,9 +125,8 @@ void main() {
       (s) => s is CollectionReady && s.notice == 'Unable to save collection.',
     );
     bloc.add(PokemonCollected(testPokemon()));
-    final state = await failed.timeout(
-      const Duration(seconds: 1),
-    ) as CollectionReady;
+    final state =
+        await failed.timeout(const Duration(seconds: 1)) as CollectionReady;
 
     expect(state.pokemons, isEmpty);
     await bloc.close();
@@ -148,9 +147,8 @@ void main() {
       (s) => s is CollectionReady && s.notice == 'Unable to save collection.',
     );
     bloc.add(PokemonUpdated(testPokemon().copyWith(name: 'Ivysaur')));
-    final state = await failed.timeout(
-      const Duration(seconds: 1),
-    ) as CollectionReady;
+    final state =
+        await failed.timeout(const Duration(seconds: 1)) as CollectionReady;
 
     expect(state.pokemons.single.name, 'bulbasaur');
     await bloc.close();
@@ -171,9 +169,8 @@ void main() {
       (s) => s is CollectionReady && s.notice == 'Unable to save collection.',
     );
     bloc.add(PokemonFavoriteToggled(testPokemon()));
-    final state = await failed.timeout(
-      const Duration(seconds: 1),
-    ) as CollectionReady;
+    final state =
+        await failed.timeout(const Duration(seconds: 1)) as CollectionReady;
 
     expect(state.pokemons.single.isFavorite, isFalse);
     await bloc.close();
@@ -194,9 +191,8 @@ void main() {
       (s) => s is CollectionReady && s.notice == 'Unable to save collection.',
     );
     bloc.add(const PokemonRemoved(1));
-    final state = await failed.timeout(
-      const Duration(seconds: 1),
-    ) as CollectionReady;
+    final state =
+        await failed.timeout(const Duration(seconds: 1)) as CollectionReady;
 
     expect(state.pokemons, hasLength(1));
     await bloc.close();

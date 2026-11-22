@@ -3,7 +3,8 @@ import 'package:sqflite/sqflite.dart';
 
 import '../models/pokemon_row.dart';
 
-const String createPokemonTableSql = '''
+const String createPokemonTableSql =
+    '''
 CREATE TABLE ${PokemonRow.table} (
   ${PokemonRow.columnApiId} INTEGER PRIMARY KEY,
   ${PokemonRow.columnName} TEXT NOT NULL,
