@@ -116,6 +116,7 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          spacing: 12,
           children: [
             TextField(
               key: const Key('edit-name'),
@@ -140,10 +141,8 @@ class _PokemonFormDialogState extends State<PokemonFormDialog> {
                 labelText: 'Portrait URL (optional)',
               ),
             ),
-            if (_error != null) ...[
-              const SizedBox(height: 12),
+            if (_error != null)
               Text(_error!, style: const TextStyle(color: Color(0xFFBA4938))),
-            ],
           ],
         ),
       ),

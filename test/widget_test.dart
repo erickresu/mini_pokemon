@@ -88,6 +88,62 @@ void main() {
     expect(find.text('BULBASAUR'), findsNothing);
   });
 
+  testWidgets('edit dialog leaves vertical space between fields', (
+    tester,
+  ) async {
+    final repo = FakeCollectionRepository();
+    await repo.add(testPokemon());
+    await tester.pumpWidget(_app(repo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextField);
+    expect(fields, findsNWidgets(9));
+
+    for (var index = 0; index < fields.evaluate().length - 1; index++) {
+      final current = tester.getRect(fields.at(index));
+      final next = tester.getRect(fields.at(index + 1));
+
+      expect(
+        next.top - current.bottom,
+        greaterThanOrEqualTo(8),
+        reason: 'gap between field $index and field ${index + 1}',
+      );
+    }
+  });
+
+  testWidgets('edit dialog scrolls with the keyboard open', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.view.viewInsets = const FakeViewPadding(bottom: 260);
+    addTearDown(() {
+      tester.view.viewInsets = FakeViewPadding.zero;
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repo = FakeCollectionRepository();
+    await repo.add(testPokemon());
+    await tester.pumpWidget(_app(repo));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cancel'), findsOneWidget);
+    expect(find.text('Save'), findsOneWidget);
+
+    final scroll = find.byType(SingleChildScrollView);
+    expect(scroll, findsOneWidget);
+
+    await tester.drag(scroll, const Offset(0, -600));
+    await tester.pumpAndSettle();
+
+    expect(tester.getRect(find.byType(TextField).last).bottom, lessThan(640));
+  });
+
   testWidgets('edit form rejects a blank name', (tester) async {
     final repo = FakeCollectionRepository();
     await repo.add(testPokemon());
