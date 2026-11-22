@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../domain/entities/pokemon.dart';
 import '../blocs/collection_bloc.dart';
 import '../widgets/pokemon_card.dart';
+import '../widgets/pokemon_form_dialog.dart';
 import 'pokemon_discover_page.dart';
 
 class PokemonListPage extends StatelessWidget {
@@ -37,6 +38,14 @@ class PokemonListPage extends StatelessWidget {
     }
   }
 
+  Future<void> _edit(BuildContext context, Pokemon pokemon) async {
+    final updated = await PokemonFormDialog.edit(context, pokemon);
+
+    if (updated != null && context.mounted) {
+      context.read<CollectionBloc>().add(PokemonUpdated(updated));
+    }
+  }
+
   void _openDiscover(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -55,66 +64,104 @@ class PokemonListPage extends StatelessWidget {
             ..showSnackBar(SnackBar(content: Text(state.notice!)));
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('My Collection'),
-          actions: [
-            TextButton(
-              onPressed: () => _openDiscover(context),
-              child: const Text('Add New Pokemon'),
-            ),
-          ],
-        ),
-        body: BlocBuilder<CollectionBloc, CollectionState>(
-          builder: (context, state) {
-            if (state is CollectionInitial || state is CollectionLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+      child: BlocBuilder<CollectionBloc, CollectionState>(
+        builder: (context, state) {
+          final ready = state is CollectionReady ? state : null;
+          final favoritesOnly = ready?.favoritesOnly ?? false;
+          final pokemons = ready?.pokemons ?? const <Pokemon>[];
 
-            if (state is! CollectionReady) {
-              return const Center(child: Text('Unable to load collection.'));
-            }
-
-            final pokemons = state.pokemons;
-
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      '${pokemons.length} Pokemon',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ),
+          return Scaffold(
+            appBar: AppBar(title: const Text('My Collection')),
+            body: _body(context, state, pokemons, favoritesOnly),
+            bottomNavigationBar: NavigationBar(
+              selectedIndex: favoritesOnly ? 2 : 0,
+              onDestinationSelected: (index) {
+                if (index == 1) {
+                  _openDiscover(context);
+                  return;
+                }
+                context.read<CollectionBloc>().add(
+                  CollectionFilterChanged(favoritesOnly: index == 2),
+                );
+              },
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.catching_pokemon_outlined),
+                  label: 'Collection',
                 ),
-                Expanded(
-                  child: pokemons.isEmpty
-                      ? const Center(
-                          child: Text('No Pokemon yet. Add your first one!'),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          itemCount: pokemons.length,
-                          itemBuilder: (context, index) {
-                            final pokemon = pokemons[index];
-                            return PokemonCard(
-                              pokemon: pokemon,
-                              onDelete: () => _confirmDelete(context, pokemon),
-                            );
-                          },
-                        ),
+                NavigationDestination(
+                  icon: Icon(Icons.add_circle_outline),
+                  label: 'Add Pokemon',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.star_border),
+                  selectedIcon: Icon(Icons.star),
+                  label: 'Favorites',
                 ),
               ],
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
+    );
+  }
+
+  Widget _body(
+    BuildContext context,
+    CollectionState state,
+    List<Pokemon> pokemons,
+    bool favoritesOnly,
+  ) {
+    if (state is CollectionInitial || state is CollectionLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state is! CollectionReady) {
+      return const Center(child: Text('Unable to load collection.'));
+    }
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '${pokemons.length} Pokemon',
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: pokemons.isEmpty
+              ? Center(
+                  child: Text(
+                    favoritesOnly
+                        ? 'No favorites yet. Star a Pokemon to see it here.'
+                        : 'No Pokemon yet. Add your first one!',
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  itemCount: pokemons.length,
+                  itemBuilder: (context, index) {
+                    final pokemon = pokemons[index];
+                    return PokemonCard(
+                      pokemon: pokemon,
+                      onDelete: () => _confirmDelete(context, pokemon),
+                      onEdit: () => _edit(context, pokemon),
+                      onFavoriteToggled: () => context
+                          .read<CollectionBloc>()
+                          .add(PokemonFavoriteToggled(pokemon)),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 }

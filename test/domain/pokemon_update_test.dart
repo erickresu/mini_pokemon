@@ -6,7 +6,11 @@ import '../fakes/fake_collection_repository.dart';
 void main() {
   test('copyWith changes editable fields and keeps apiId', () {
     final original = testPokemon();
-    final updated = original.copyWith(name: 'Ivysaur', hp: 60, isFavorite: true);
+    final updated = original.copyWith(
+      name: 'Ivysaur',
+      hp: 60,
+      isFavorite: true,
+    );
 
     expect(updated.apiId, original.apiId);
     expect(updated.name, 'Ivysaur');

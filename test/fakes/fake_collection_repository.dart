@@ -59,10 +59,10 @@ class FakeCollectionRepository implements CollectionRepository {
   }
 }
 
-Pokemon testPokemon({int apiId = 1}) {
+Pokemon testPokemon({int apiId = 1, String name = 'bulbasaur'}) {
   return Pokemon(
     apiId: apiId,
-    name: 'bulbasaur',
+    name: name,
     types: ['grass', 'poison'],
     hp: 45,
     attack: 49,

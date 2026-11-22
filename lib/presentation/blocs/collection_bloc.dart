@@ -167,10 +167,7 @@ class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
     if (emit.isDone) return;
 
     _all = _all
-        .map(
-          (item) =>
-              item.apiId == event.pokemon.apiId ? event.pokemon : item,
-        )
+        .map((item) => item.apiId == event.pokemon.apiId ? event.pokemon : item)
         .toList();
 
     _emitReady(emit, notice: 'Updated ${event.pokemon.name}.');

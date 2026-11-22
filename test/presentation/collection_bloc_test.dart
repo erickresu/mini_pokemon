@@ -104,34 +104,37 @@ void main() {
       (s) => s is CollectionReady && s.notice == 'Updated Ivysaur.',
     );
     bloc.add(PokemonUpdated(pokemon.copyWith(name: 'Ivysaur')));
-    final state =
-        await updatedReady.timeout(const Duration(seconds: 1))
-            as CollectionReady;
+    final state = await updatedReady.timeout(
+      const Duration(seconds: 1),
+    ) as CollectionReady;
 
     expect(state.pokemons.single.name, 'Ivysaur');
     await bloc.close();
   });
 
-  test('favorites filter hides non favorites and survives stream updates', () async {
-    final repo = FakeCollectionRepository();
-    await repo.add(testPokemon(apiId: 1));
-    await repo.add(testPokemon(apiId: 2));
-    final bloc = _bloc(repo);
-    final ready = bloc.stream.firstWhere(
-      (s) => s is CollectionReady && s.pokemons.length == 2,
-    );
-    bloc.add(CollectionStarted());
-    await ready.timeout(const Duration(seconds: 1));
+  test(
+    'favorites filter hides non favorites and survives stream updates',
+    () async {
+      final repo = FakeCollectionRepository();
+      await repo.add(testPokemon(apiId: 1));
+      await repo.add(testPokemon(apiId: 2));
+      final bloc = _bloc(repo);
+      final ready = bloc.stream.firstWhere(
+        (s) => s is CollectionReady && s.pokemons.length == 2,
+      );
+      bloc.add(CollectionStarted());
+      await ready.timeout(const Duration(seconds: 1));
 
-    bloc.add(const CollectionFilterChanged(favoritesOnly: true));
-    await Future<void>.delayed(Duration.zero);
-    final first = (await repo.watchAll().first).first;
-    await repo.update(first.copyWith(isFavorite: true));
-    await Future<void>.delayed(Duration.zero);
+      bloc.add(const CollectionFilterChanged(favoritesOnly: true));
+      await Future<void>.delayed(Duration.zero);
+      final first = (await repo.watchAll().first).first;
+      await repo.update(first.copyWith(isFavorite: true));
+      await Future<void>.delayed(Duration.zero);
 
-    final state = bloc.state as CollectionReady;
-    expect(state.favoritesOnly, isTrue);
-    expect(state.pokemons.map((item) => item.apiId), [1]);
-    await bloc.close();
-  });
+      final state = bloc.state as CollectionReady;
+      expect(state.favoritesOnly, isTrue);
+      expect(state.pokemons.map((item) => item.apiId), [1]);
+      await bloc.close();
+    },
+  );
 }

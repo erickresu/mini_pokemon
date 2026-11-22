@@ -4,10 +4,18 @@ import '../../domain/entities/pokemon.dart';
 import 'pokemon_network_portrait.dart';
 
 class PokemonCard extends StatelessWidget {
-  const PokemonCard({super.key, required this.pokemon, required this.onDelete});
+  const PokemonCard({
+    super.key,
+    required this.pokemon,
+    required this.onDelete,
+    required this.onEdit,
+    required this.onFavoriteToggled,
+  });
 
   final Pokemon pokemon;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
+  final VoidCallback onFavoriteToggled;
 
   String get _primaryType =>
       pokemon.types.isEmpty ? '' : pokemon.types.first.trim().toLowerCase();
@@ -107,8 +115,26 @@ class PokemonCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                IconButton(
+                  key: Key('favorite-${pokemon.apiId}'),
+                  onPressed: onFavoriteToggled,
+                  tooltip: pokemon.isFavorite
+                      ? 'Remove from favorites'
+                      : 'Add to favorites',
+                  icon: Icon(
+                    pokemon.isFavorite ? Icons.star : Icons.star_border,
+                    color: pokemon.isFavorite
+                        ? const Color(0xFFB8860B)
+                        : const Color(0xFF7C8492),
+                  ),
+                ),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: onEdit,
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: const Text('Edit'),
+                ),
                 TextButton.icon(
                   onPressed: onDelete,
                   icon: const Icon(Icons.delete_outline, size: 18),
